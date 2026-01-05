@@ -273,7 +273,8 @@ def main():
                 output_dir=args.output,
                 validate=not args.no_validate,
                 proxy_file=args.proxy_file,
-                use_hunter=use_hunter
+                use_hunter=use_hunter,
+                enrich=args.geo  # --geo enables IP enrichment
             )
 
         # Exit with appropriate code

@@ -302,129 +302,261 @@ def extract_proxies_from_text(text: str) -> List[str]:
     return list(set(proxies))  # Remove duplicates
 
 
-class GeoLocator:
-    """IP Geolocation lookup using free APIs."""
+class IPEnricher:
+    """
+    Comprehensive IP enrichment with ASN, geolocation, and ownership data.
 
-    # Free geolocation APIs (no API key required)
-    GEOIP_APIS = [
-        "http://ip-api.com/json/{ip}?fields=status,country,countryCode,region,city,isp,org,as",
-        "https://ipwho.is/{ip}",
-    ]
+    Uses multiple free APIs with fallback for reliability.
+    """
 
-    def __init__(self, cache_enabled: bool = True):
+    # API providers with rate limits (requests per minute)
+    PROVIDERS = {
+        'ip-api': {
+            'url': 'http://ip-api.com/json/{ip}?fields=status,message,country,countryCode,region,regionName,city,zip,lat,lon,timezone,isp,org,as,asname,mobile,proxy,hosting,query',
+            'rate_limit': 45,  # 45/min for free tier
+        },
+        'ipwho': {
+            'url': 'https://ipwho.is/{ip}',
+            'rate_limit': 10000,  # Very generous
+        },
+        'ipapi': {
+            'url': 'https://ipapi.co/{ip}/json/',
+            'rate_limit': 30,  # 1000/day ~ 30/min average
+        },
+    }
+
+    def __init__(self, cache_enabled: bool = True, max_cache_size: int = 10000):
         self.cache: Dict[str, Dict] = {}
         self.cache_enabled = cache_enabled
+        self.max_cache_size = max_cache_size
+        self._request_counts: Dict[str, int] = {p: 0 for p in self.PROVIDERS}
 
-    def lookup(self, ip: str, timeout: int = 3) -> Optional[Dict[str, Any]]:
+    def enrich(self, ip: str, timeout: int = 5) -> Optional[Dict[str, Any]]:
         """
-        Look up geolocation data for an IP address.
+        Enrich an IP address with full ASN, geo, and ownership data.
 
-        Returns dict with country, city, isp, etc. or None on failure.
+        Returns comprehensive dict with:
+        - Geolocation: country, country_code, region, city, lat, lon, timezone
+        - Network: asn, asn_name, isp, org
+        - Ownership: org, isp, hosting (datacenter), mobile, proxy
         """
         if not validate_ip(ip):
             return None
 
-        # Check cache first
+        # Check cache
         if self.cache_enabled and ip in self.cache:
             return self.cache[ip]
 
         import requests
 
-        for api_template in self.GEOIP_APIS:
+        result = None
+
+        # Try providers in order
+        for provider_name, provider_config in self.PROVIDERS.items():
             try:
-                url = api_template.format(ip=ip)
-                response = requests.get(url, timeout=timeout)
+                url = provider_config['url'].format(ip=ip)
+                response = requests.get(url, timeout=timeout, headers={
+                    'User-Agent': get_user_agent(),
+                    'Accept': 'application/json',
+                })
 
                 if response.status_code == 200:
                     data = response.json()
+                    result = self._parse_response(provider_name, data, ip)
 
-                    # Normalize response format
-                    geo_info = self._normalize_response(data)
+                    if result:
+                        break
 
-                    if geo_info:
-                        if self.cache_enabled:
-                            self.cache[ip] = geo_info
-                        return geo_info
+                elif response.status_code == 429:
+                    # Rate limited, try next provider
+                    continue
 
+            except requests.exceptions.Timeout:
+                continue
             except Exception:
                 continue
 
-        return None
+        # Cache result
+        if result and self.cache_enabled:
+            if len(self.cache) >= self.max_cache_size:
+                # Remove oldest entries (simple FIFO)
+                keys_to_remove = list(self.cache.keys())[:1000]
+                for key in keys_to_remove:
+                    del self.cache[key]
+            self.cache[ip] = result
 
-    def _normalize_response(self, data: Dict) -> Optional[Dict[str, Any]]:
-        """Normalize different API response formats."""
-        # ip-api.com format
-        if 'status' in data:
-            if data.get('status') == 'success':
-                return {
-                    'country': data.get('country', ''),
-                    'country_code': data.get('countryCode', ''),
-                    'region': data.get('region', ''),
-                    'city': data.get('city', ''),
-                    'isp': data.get('isp', ''),
-                    'org': data.get('org', ''),
-                    'asn': data.get('as', ''),
-                }
-            return None
+        return result
 
-        # ipwho.is format
-        if 'success' in data:
-            if data.get('success'):
-                return {
-                    'country': data.get('country', ''),
-                    'country_code': data.get('country_code', ''),
-                    'region': data.get('region', ''),
-                    'city': data.get('city', ''),
-                    'isp': data.get('connection', {}).get('isp', ''),
-                    'org': data.get('connection', {}).get('org', ''),
-                    'asn': data.get('connection', {}).get('asn', ''),
-                }
-            return None
+    def _parse_response(self, provider: str, data: Dict, ip: str) -> Optional[Dict[str, Any]]:
+        """Parse response from different providers into unified format."""
 
-        # Generic format (try common fields)
-        if 'country' in data or 'country_name' in data:
+        if provider == 'ip-api':
+            if data.get('status') != 'success':
+                return None
+
+            asn_full = data.get('as', '')
+            asn_number = ''
+            asn_name = data.get('asname', '')
+
+            # Parse ASN number from "AS12345 Company Name" format
+            if asn_full and asn_full.startswith('AS'):
+                parts = asn_full.split(' ', 1)
+                asn_number = parts[0]  # AS12345
+                if len(parts) > 1 and not asn_name:
+                    asn_name = parts[1]
+
             return {
-                'country': data.get('country') or data.get('country_name', ''),
-                'country_code': data.get('country_code', ''),
-                'region': data.get('region') or data.get('region_name', ''),
+                'ip': ip,
+                # Geolocation
+                'country': data.get('country', ''),
+                'country_code': data.get('countryCode', ''),
+                'region': data.get('regionName', '') or data.get('region', ''),
+                'region_code': data.get('region', ''),
                 'city': data.get('city', ''),
+                'zip': data.get('zip', ''),
+                'latitude': data.get('lat'),
+                'longitude': data.get('lon'),
+                'timezone': data.get('timezone', ''),
+                # Network / ASN
+                'asn': asn_number,
+                'asn_name': asn_name,
+                'asn_full': asn_full,
+                # Ownership
                 'isp': data.get('isp', ''),
-                'org': data.get('org') or data.get('organization', ''),
-                'asn': data.get('asn', ''),
+                'org': data.get('org', ''),
+                'is_mobile': data.get('mobile', False),
+                'is_proxy': data.get('proxy', False),
+                'is_hosting': data.get('hosting', False),
+                # Provider info
+                '_provider': 'ip-api',
+            }
+
+        elif provider == 'ipwho':
+            if not data.get('success', False):
+                return None
+
+            connection = data.get('connection', {})
+
+            return {
+                'ip': ip,
+                # Geolocation
+                'country': data.get('country', ''),
+                'country_code': data.get('country_code', ''),
+                'region': data.get('region', ''),
+                'region_code': data.get('region_code', ''),
+                'city': data.get('city', ''),
+                'zip': data.get('postal', ''),
+                'latitude': data.get('latitude'),
+                'longitude': data.get('longitude'),
+                'timezone': data.get('timezone', {}).get('id', ''),
+                # Network / ASN
+                'asn': f"AS{connection.get('asn', '')}" if connection.get('asn') else '',
+                'asn_name': connection.get('org', ''),
+                'asn_full': f"AS{connection.get('asn', '')} {connection.get('org', '')}".strip(),
+                # Ownership
+                'isp': connection.get('isp', ''),
+                'org': connection.get('org', ''),
+                'is_mobile': data.get('type') == 'mobile',
+                'is_proxy': False,  # Not provided
+                'is_hosting': data.get('type') == 'hosting',
+                # Provider info
+                '_provider': 'ipwho',
+            }
+
+        elif provider == 'ipapi':
+            if data.get('error'):
+                return None
+
+            asn = data.get('asn', '')
+
+            return {
+                'ip': ip,
+                # Geolocation
+                'country': data.get('country_name', ''),
+                'country_code': data.get('country_code', ''),
+                'region': data.get('region', ''),
+                'region_code': data.get('region_code', ''),
+                'city': data.get('city', ''),
+                'zip': data.get('postal', ''),
+                'latitude': data.get('latitude'),
+                'longitude': data.get('longitude'),
+                'timezone': data.get('timezone', ''),
+                # Network / ASN
+                'asn': asn,
+                'asn_name': data.get('org', ''),
+                'asn_full': f"{asn} {data.get('org', '')}".strip(),
+                # Ownership
+                'isp': data.get('org', ''),
+                'org': data.get('org', ''),
+                'is_mobile': False,  # Not provided
+                'is_proxy': False,   # Not provided
+                'is_hosting': False, # Not provided
+                # Provider info
+                '_provider': 'ipapi',
             }
 
         return None
 
-    def lookup_batch(self, ips: List[str], max_workers: int = 5,
-                     show_progress: bool = False) -> Dict[str, Dict]:
+    def enrich_batch(self, ips: List[str], max_workers: int = 10,
+                     show_progress: bool = False,
+                     rate_limit_delay: float = 0.1) -> Dict[str, Dict]:
         """
-        Look up geolocation for multiple IPs concurrently.
+        Enrich multiple IPs concurrently with rate limiting.
 
-        Returns dict mapping IP -> geo_info.
+        Args:
+            ips: List of IP addresses
+            max_workers: Concurrent threads
+            show_progress: Print progress
+            rate_limit_delay: Delay between requests (seconds)
+
+        Returns:
+            Dict mapping IP -> enrichment data
         """
         import concurrent.futures
+        import threading
 
         results = {}
+        lock = threading.Lock()
+        completed = 0
+
+        def enrich_with_delay(ip: str) -> Tuple[str, Optional[Dict]]:
+            nonlocal completed
+            time.sleep(rate_limit_delay)  # Rate limiting
+            result = self.enrich(ip)
+            with lock:
+                completed += 1
+                if show_progress and completed % 50 == 0:
+                    print(f"\r  Enriched {completed}/{len(ips)} IPs...", end='')
+            return ip, result
+
+        # Deduplicate IPs
+        unique_ips = list(set(ips))
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-            future_to_ip = {executor.submit(self.lookup, ip): ip for ip in ips}
+            futures = [executor.submit(enrich_with_delay, ip) for ip in unique_ips]
 
-            for future in concurrent.futures.as_completed(future_to_ip):
-                ip = future_to_ip[future]
+            for future in concurrent.futures.as_completed(futures):
                 try:
-                    geo_info = future.result()
-                    if geo_info:
-                        results[ip] = geo_info
+                    ip, data = future.result()
+                    if data:
+                        results[ip] = data
                 except Exception:
                     pass
+
+        if show_progress:
+            print(f"\r  Enriched {len(results)}/{len(unique_ips)} IPs successfully")
 
         return results
 
 
+# Backwards compatibility alias
+GeoLocator = IPEnricher
+
+
 def get_geo_info(ip: str) -> Optional[Dict[str, Any]]:
     """Quick helper to get geolocation for a single IP."""
-    locator = GeoLocator()
-    return locator.lookup(ip)
+    enricher = IPEnricher()
+    return enricher.enrich(ip)
 
 
 def format_geo_info(geo: Optional[Dict]) -> str:
@@ -441,3 +573,57 @@ def format_geo_info(geo: Optional[Dict]) -> str:
         parts.append(geo['country'][:20])
 
     return ", ".join(parts) if parts else "Unknown"
+
+
+def format_asn_info(geo: Optional[Dict]) -> str:
+    """Format ASN info as a string."""
+    if not geo:
+        return "Unknown"
+
+    asn = geo.get('asn', '')
+    asn_name = geo.get('asn_name', '')
+
+    if asn and asn_name:
+        return f"{asn} ({asn_name[:30]})"
+    elif asn:
+        return asn
+    elif asn_name:
+        return asn_name[:40]
+    return "Unknown"
+
+
+def format_ownership_info(geo: Optional[Dict]) -> str:
+    """Format ownership/ISP info as a string."""
+    if not geo:
+        return "Unknown"
+
+    isp = geo.get('isp', '')
+    org = geo.get('org', '')
+
+    # Prefer ISP if different from org
+    if isp and org and isp != org:
+        return f"{isp} / {org}"[:50]
+    elif isp:
+        return isp[:50]
+    elif org:
+        return org[:50]
+    return "Unknown"
+
+
+def format_proxy_type(geo: Optional[Dict]) -> str:
+    """Determine proxy type based on enrichment data."""
+    if not geo:
+        return "unknown"
+
+    types = []
+    if geo.get('is_hosting'):
+        types.append("datacenter")
+    if geo.get('is_mobile'):
+        types.append("mobile")
+    if geo.get('is_proxy'):
+        types.append("proxy")
+
+    if not types:
+        types.append("residential")
+
+    return "/".join(types)
