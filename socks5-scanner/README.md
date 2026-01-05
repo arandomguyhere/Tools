@@ -1,21 +1,26 @@
-# SOCKS5 Proxy Scanner
+# SOCKS5 Proxy Scanner v2.0
 
-A high-performance tool for discovering and validating SOCKS5 proxies.
-
-Inspired by:
-- [monosans/proxy-scraper-checker](https://github.com/monosans/proxy-scraper-checker) (Rust)
-- [arandomguyhere/Proxy-Hound](https://github.com/arandomguyhere/Proxy-Hound) (Python)
+A production-ready, high-performance SOCKS5 proxy scanner with structured results and pipeline integration.
 
 ## Features
 
-- **Multi-source scanning**: 20+ static proxy sources
-- **GitHub hunting**: Discovers new proxy repositories automatically
-- **SOCKS5 validation**: Tests actual protocol handshake
-- **HTTP testing**: Verifies connectivity through proxies
-- **Async mode**: High-performance concurrent scanning
-- **Geolocation**: IP location lookup (country, city, ISP)
-- **Adaptive learning**: Tracks which sources work best over time
-- **SQLite database**: Persistent storage for source quality scores
+### Core Capabilities
+- **Sync and Async modes**: Choose based on your use case
+- **Structured results**: Full `ProxyResult` objects with error categorization
+- **Error classification**: 15+ error categories (timeout, DNS, protocol mismatch, etc.)
+- **Configurable timeouts**: Per-stage timeouts (connect/read/write/http)
+- **Retry logic**: Configurable retries with exponential backoff
+
+### Performance
+- **Semaphore-controlled concurrency**: Precise control over parallel connections
+- **Optional uvloop**: Faster event loop on Linux/macOS
+- **Streaming results**: Memory-efficient for large scans
+
+### Integration
+- **JSON/CSV/TXT export**: Multiple output formats
+- **Pipeline hooks**: Callbacks, filters, streaming, webhooks
+- **Feed interfaces**: File, URL, and custom source adapters
+- **Logging infrastructure**: Debug/info/warn levels with color support
 
 ## Installation
 
@@ -26,125 +31,242 @@ pip install -r requirements.txt
 
 ## Quick Start
 
-```bash
-# Standard scan from static sources
-python -m src.main
-
-# Hunt for new sources on GitHub
-python -m src.main --hunt
-
-# Hunt mode only
-python -m src.main -m hunt
-
-# Async mode for speed
-python -m src.main --async --concurrency 200
-
-# All features combined
-python -m src.main --hunt --async --geo
-```
-
-## Usage
-
-```
-usage: main.py [-h] [-m {free,file,hunt,both}] [-f PROXY_FILE] [--hunt]
-               [-t THREADS] [--async] [--concurrency N] [--geo]
-               [-o OUTPUT] [--timeout TIMEOUT] [--no-validate] [-q] [-v]
-
-Options:
-  -m, --mode          Scan mode: free, file, hunt, or both
-  --hunt              Enable GitHub repository hunting
-  -t, --threads       Threads for sync mode (default: 20)
-  --async             Use async mode (faster)
-  --concurrency       Concurrent connections (default: 100)
-  --geo               Enable geolocation lookup
-  -o, --output        Output directory (default: ./results)
-```
-
-## Modes
-
-| Mode | Description |
-|------|-------------|
-| `free` | Use 20+ pre-configured static sources |
-| `hunt` | Search GitHub for proxy repositories |
-| `file` | Load proxies from a local file |
-| `both` | Combine free and file sources |
-| `--hunt` | Add hunting to any mode |
-
-## Examples
+### CLI Usage
 
 ```bash
-# Fast async with GitHub hunting
-python -m src.main --hunt --async --concurrency 200
+# Scan proxies from file (sync mode)
+python -m src.cli scan proxies.txt
 
-# Hunt + geolocation
-python -m src.main -m hunt --geo
+# Async mode (faster) with 200 concurrent connections
+python -m src.cli scan proxies.txt --async -c 200
 
-# Standard + hunting combined
-python -m src.main --hunt -t 50
+# Test a single proxy
+python -m src.cli test 1.2.3.4:1080 --verbose
 
-# From file with validation
-python -m src.main -m file -f proxies.txt
+# Fetch from default sources and scan
+python -m src.cli fetch --sources default --async
 ```
 
-## How Hunting Works
-
-The hunter (inspired by Proxy-Hound) uses:
-
-1. **Scent Analysis**: Scores repositories by proxy-related keywords
-2. **Freshness Detection**: Prioritizes recently updated repos
-3. **Adaptive Learning**: Tracks which sources yield valid proxies
-4. **SQLite Database**: Remembers good sources between runs
+### Python API
 
 ```python
+# Sync scanning
+from src import SyncScanner, ScanConfig
+
+config = ScanConfig(
+    connect_timeout=5.0,
+    max_concurrent=50,
+    max_retries=1
+)
+
+with SyncScanner(config) as scanner:
+    # Single proxy
+    result = scanner.scan_one("1.2.3.4:1080")
+    print(result.to_dict())
+
+    # Multiple proxies
+    results = scanner.scan_many(proxy_list)
+    print(f"Working: {results.working}/{results.total}")
+```
+
+```python
+# Async scanning (faster)
+from src import AsyncScanner
+import asyncio
+
+async def scan():
+    async with AsyncScanner() as scanner:
+        results = await scanner.scan_many(proxies, concurrency=200)
+        return results
+
+results = asyncio.run(scan())
+```
+
+## Structured Results
+
+Every scan returns structured `ProxyResult` objects:
+
+```python
+{
+    "proxy": "1.2.3.4:1080",
+    "host": "1.2.3.4",
+    "port": 1080,
+    "protocol": "socks5",
+    "reachable": true,
+    "socks5_valid": true,
+    "tunnel_works": true,
+    "http_works": true,
+    "latency_ms": 85,
+    "error": null,
+    "error_category": null,
+    "external_ip": "1.2.3.4",
+    "timing": {
+        "connect_ms": 12,
+        "handshake_ms": 8,
+        "tunnel_ms": 15,
+        "http_ms": 50
+    }
+}
+```
+
+## Error Categories
+
+Precise failure diagnosis with 15+ categories:
+
+| Category | Description |
+|----------|-------------|
+| `TIMEOUT_CONNECT` | Connection timeout |
+| `TIMEOUT_READ` | Read/recv timeout |
+| `DNS_FAILURE` | DNS resolution failed |
+| `NETWORK_UNREACHABLE` | Network/host unreachable |
+| `CONNECTION_REFUSED` | Connection actively refused |
+| `CONNECTION_RESET` | Connection reset by peer |
+| `HANDSHAKE_FAILED` | SOCKS5 handshake rejected |
+| `PROTOCOL_MISMATCH` | Not SOCKS5 or wrong version |
+| `AUTH_REQUIRED` | Authentication needed |
+| `PROXY_ERROR` | Proxy returned error code |
+| `HTTP_ERROR` | HTTP test failed |
+
+## Configuration
+
+```python
+from src import ScanConfig
+
+config = ScanConfig(
+    # Timeouts (seconds)
+    connect_timeout=5.0,
+    read_timeout=5.0,
+    write_timeout=5.0,
+    http_timeout=10.0,
+
+    # Retry settings
+    max_retries=1,
+    retry_delay=0.5,
+
+    # Concurrency
+    max_concurrent=100,
+
+    # Test targets
+    test_host="httpbin.org",
+    test_port=80,
+    test_url="http://httpbin.org/ip",
+)
+```
+
+## Export & Integration
+
+### Export Formats
+
+```python
+from src import export_results
+
+# Export in multiple formats
+saved = export_results(
+    results,
+    output_dir="./results",
+    formats=["json", "csv", "txt", "detailed"]
+)
+```
+
+### Pipeline Hooks
+
+```python
+from src import ProxyPipeline, FilterHook, StreamingHook
+
+pipeline = ProxyPipeline()
+pipeline.add_hook(FilterHook(working_only=True, max_latency=1000))
+pipeline.add_hook(StreamingHook("working_proxies.txt"))
+
+# Process results through pipeline
+for result in results.results:
+    pipeline.process(result)
+
+pipeline.finalize(results)
+```
+
+### Feed Interfaces
+
+```python
+from src import FileFeed, URLFeed, MultiFeed
+
+# Combine multiple sources
+feed = MultiFeed([
+    FileFeed("local_proxies.txt"),
+    URLFeed("https://example.com/proxies.txt"),
+])
+
+proxies = feed.fetch()
+```
+
+## Performance Comparison
+
+| Mode | Concurrency | 5000 proxies |
+|------|-------------|--------------|
+| Sync | 50 threads | ~2-3 min |
+| Sync | 100 threads | ~1-2 min |
+| Async | 100 concurrent | ~45 sec |
+| Async | 200 concurrent | ~25 sec |
+| Async + uvloop | 200 concurrent | ~20 sec |
+
+## Legacy Features
+
+The v1 API is still available for compatibility:
+
+```python
+# GitHub hunting (discovers new proxy sources)
 from src import ProxyHunter
 
 hunter = ProxyHunter()
 proxies, results = hunter.hunt()
 
-# Check hunting stats
-stats = hunter.db.get_stats()
-print(f"Tracked repos: {stats['total_repos']}")
-print(f"Avg success score: {stats['avg_score']:.1f}")
-```
+# IP enrichment (ASN, geo, ownership)
+from src import IPEnricher
 
-## Python API
+enricher = IPEnricher()
+info = enricher.enrich("1.2.3.4")
+# Returns: country, city, asn, isp, is_datacenter, etc.
 
-```python
-# Standard scan
-from src import Socks5Scanner, quick_scan
+# Quick scan from static sources
+from src import quick_scan
 results = quick_scan()
-
-# With hunting
-scanner = Socks5Scanner()
-results = scanner.run_full_scan(use_hunter=True)
-
-# Async mode
-from src import run_async_scan
-results = run_async_scan(concurrency=200, geo_lookup=True)
-
-# Direct hunter access
-from src import ProxyHunter
-hunter = ProxyHunter()
-proxies, hunt_results = hunter.hunt()
 ```
 
-## Output
+## Architecture
 
-Results are saved to the output directory:
+```
+src/
+├── core.py           # Types, enums, structured results
+├── sync_scanner.py   # Synchronous scanner with thread pool
+├── async_scanner_v2.py # Async scanner with semaphore control
+├── logger.py         # Logging infrastructure
+├── export.py         # Export formats and hooks
+├── cli.py            # Unified CLI
+├── scanner.py        # Legacy: Source collection
+├── validator.py      # Legacy: Proxy validation
+├── hunter.py         # Legacy: GitHub discovery
+└── utils.py          # Legacy: Utilities
+```
 
-- `results_*.json` - Full results with metadata
-- `valid_proxies_*.txt` - Valid SOCKS5 proxies
-- `working_proxies_*.txt` - HTTP-tested working proxies
-- `proxy_hunt.db` - SQLite database (hunt mode)
+## CLI Reference
 
-## Performance
+```
+usage: socks5-scanner [-h] [-v] [--debug] [-q] [--json] {scan,test,fetch,version}
 
-| Mode | Config | ~5000 proxies |
-|------|--------|---------------|
-| Sync | 20 threads | ~4-5 min |
-| Sync | 100 threads | ~1-2 min |
-| Async | 100 concurrent | ~45 sec |
-| Async | 200 concurrent | ~25 sec |
+Commands:
+  scan      Scan proxies from file/stdin
+  test      Test a single proxy
+  fetch     Fetch and scan from sources
+  version   Show version info
+
+Scan options:
+  -o, --output DIR      Output directory
+  -f, --format FMT      Output formats (json, csv, txt, detailed)
+  --async               Use async scanner
+  -c, --concurrency N   Concurrent connections
+  --timeout SECS        Connection timeout
+  --http-timeout SECS   HTTP test timeout
+  --retries N           Retry count
+```
 
 ## License
 

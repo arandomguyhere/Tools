@@ -314,3 +314,7 @@ def quick_scan(max_workers: int = 20, output_dir: str = './results') -> Dict:
         output_dir=output_dir,
         validate=True
     )
+
+
+# Alias for compatibility
+ProxyScanner = Socks5Scanner
