@@ -1,148 +1,150 @@
 # SOCKS5 Proxy Scanner
 
-A high-performance, multi-threaded tool for discovering and validating SOCKS5 proxies from various free sources. Inspired by [monosans/proxy-scraper-checker](https://github.com/monosans/proxy-scraper-checker).
+A high-performance tool for discovering and validating SOCKS5 proxies.
+
+Inspired by:
+- [monosans/proxy-scraper-checker](https://github.com/monosans/proxy-scraper-checker) (Rust)
+- [arandomguyhere/Proxy-Hound](https://github.com/arandomguyhere/Proxy-Hound) (Python)
 
 ## Features
 
-- **Multi-source scanning**: Collects from 20+ free proxy lists
+- **Multi-source scanning**: 20+ static proxy sources
+- **GitHub hunting**: Discovers new proxy repositories automatically
 - **SOCKS5 validation**: Tests actual protocol handshake
-- **HTTP testing**: Verifies real connectivity through proxies
-- **Async mode**: High-performance concurrent scanning with `aiohttp`
+- **HTTP testing**: Verifies connectivity through proxies
+- **Async mode**: High-performance concurrent scanning
 - **Geolocation**: IP location lookup (country, city, ISP)
-- **Flexible output**: JSON and plain text formats
+- **Adaptive learning**: Tracks which sources work best over time
+- **SQLite database**: Persistent storage for source quality scores
 
 ## Installation
 
 ```bash
 cd socks5-scanner
-
-# Install core dependencies
 pip install -r requirements.txt
-
-# Or minimal install
-pip install requests PySocks PyYAML
-
-# For async mode (recommended for large scans)
-pip install aiohttp
 ```
 
 ## Quick Start
 
 ```bash
-# Run a quick test
-python quick_test.py
-
-# Standard scan (threaded)
+# Standard scan from static sources
 python -m src.main
 
-# Async mode - much faster for large scans
+# Hunt for new sources on GitHub
+python -m src.main --hunt
+
+# Hunt mode only
+python -m src.main -m hunt
+
+# Async mode for speed
 python -m src.main --async --concurrency 200
 
-# With geolocation
-python -m src.main --async --geo
-
-# Custom output
-python -m src.main -o ./my_proxies -t 50
+# All features combined
+python -m src.main --hunt --async --geo
 ```
 
 ## Usage
 
 ```
-usage: main.py [-h] [-c CONFIG] [-m {free,file,both}] [-f PROXY_FILE]
+usage: main.py [-h] [-m {free,file,hunt,both}] [-f PROXY_FILE] [--hunt]
                [-t THREADS] [--async] [--concurrency N] [--geo]
                [-o OUTPUT] [--timeout TIMEOUT] [--no-validate] [-q] [-v]
 
 Options:
-  -m, --mode          Scan mode: free, file, or both
-  -f, --proxy-file    Proxy list file for file/both modes
+  -m, --mode          Scan mode: free, file, hunt, or both
+  --hunt              Enable GitHub repository hunting
   -t, --threads       Threads for sync mode (default: 20)
-  --async             Use async mode (faster, requires aiohttp)
-  --concurrency       Concurrent connections in async mode (default: 100)
+  --async             Use async mode (faster)
+  --concurrency       Concurrent connections (default: 100)
   --geo               Enable geolocation lookup
   -o, --output        Output directory (default: ./results)
-  --timeout           Validation timeout in seconds (default: 5)
-  --no-validate       Only collect, skip validation
 ```
+
+## Modes
+
+| Mode | Description |
+|------|-------------|
+| `free` | Use 20+ pre-configured static sources |
+| `hunt` | Search GitHub for proxy repositories |
+| `file` | Load proxies from a local file |
+| `both` | Combine free and file sources |
+| `--hunt` | Add hunting to any mode |
 
 ## Examples
 
 ```bash
-# Fast async scan with 200 concurrent connections
-python -m src.main --async --concurrency 200
+# Fast async with GitHub hunting
+python -m src.main --hunt --async --concurrency 200
 
-# Async with geolocation
-python -m src.main --async --geo -o ./results
+# Hunt + geolocation
+python -m src.main -m hunt --geo
 
-# Test proxies from a file
-python -m src.main -m file -f my_proxies.txt
+# Standard + hunting combined
+python -m src.main --hunt -t 50
 
-# Standard threaded mode
-python -m src.main -t 100
+# From file with validation
+python -m src.main -m file -f proxies.txt
+```
 
-# Just collect proxies, no validation
-python -m src.main --no-validate
+## How Hunting Works
+
+The hunter (inspired by Proxy-Hound) uses:
+
+1. **Scent Analysis**: Scores repositories by proxy-related keywords
+2. **Freshness Detection**: Prioritizes recently updated repos
+3. **Adaptive Learning**: Tracks which sources yield valid proxies
+4. **SQLite Database**: Remembers good sources between runs
+
+```python
+from src import ProxyHunter
+
+hunter = ProxyHunter()
+proxies, results = hunter.hunt()
+
+# Check hunting stats
+stats = hunter.db.get_stats()
+print(f"Tracked repos: {stats['total_repos']}")
+print(f"Avg success score: {stats['avg_score']:.1f}")
 ```
 
 ## Python API
 
 ```python
-# Standard mode
+# Standard scan
 from src import Socks5Scanner, quick_scan
-
-# Quick scan
 results = quick_scan()
 
-# Custom scan
-scanner = Socks5Scanner({'timeout': 10})
-results = scanner.run_full_scan(max_workers=50)
+# With hunting
+scanner = Socks5Scanner()
+results = scanner.run_full_scan(use_hunter=True)
 
-# Async mode (faster)
-from src import run_async_scan, AsyncSocks5Scanner
-import asyncio
-
-# Quick async
+# Async mode
+from src import run_async_scan
 results = run_async_scan(concurrency=200, geo_lookup=True)
 
-# Custom async
-scanner = AsyncSocks5Scanner()
-results = asyncio.run(scanner.run_scan(concurrency=300))
-
-# Access results
-for proxy in results['valid']:
-    print(f"{proxy['proxy']} - {proxy['response_time_ms']}ms")
-    if proxy.get('geo'):
-        print(f"  Location: {proxy['geo']['country']}, {proxy['geo']['city']}")
+# Direct hunter access
+from src import ProxyHunter
+hunter = ProxyHunter()
+proxies, hunt_results = hunter.hunt()
 ```
 
 ## Output
 
 Results are saved to the output directory:
 
-- `results_YYYYMMDD_HHMMSS.json` - Full results with metadata
-- `valid_proxies_YYYYMMDD_HHMMSS.txt` - Valid SOCKS5 proxies
-- `working_proxies_YYYYMMDD_HHMMSS.txt` - HTTP-tested working proxies
+- `results_*.json` - Full results with metadata
+- `valid_proxies_*.txt` - Valid SOCKS5 proxies
+- `working_proxies_*.txt` - HTTP-tested working proxies
+- `proxy_hunt.db` - SQLite database (hunt mode)
 
-## Proxy Sources
+## Performance
 
-The scanner collects from 20+ sources including:
-- [TheSpeedX/SOCKS-List](https://github.com/TheSpeedX/SOCKS-List)
-- [monosans/proxy-list](https://github.com/monosans/proxy-list) (hourly updated)
-- [jetkai/proxy-list](https://github.com/jetkai/proxy-list)
-- [proxyscrape.com](https://proxyscrape.com)
-- And many more...
-
-## Performance Comparison
-
-| Mode | Threads/Concurrency | ~Time for 5000 proxies |
-|------|---------------------|------------------------|
-| Sync | 20 threads | ~4-5 minutes |
-| Sync | 100 threads | ~1-2 minutes |
-| Async | 100 concurrent | ~45 seconds |
-| Async | 200 concurrent | ~25 seconds |
-
-## Configuration
-
-Edit `config/config.yaml` to customize sources, timeouts, and output settings.
+| Mode | Config | ~5000 proxies |
+|------|--------|---------------|
+| Sync | 20 threads | ~4-5 min |
+| Sync | 100 threads | ~1-2 min |
+| Async | 100 concurrent | ~45 sec |
+| Async | 200 concurrent | ~25 sec |
 
 ## License
 

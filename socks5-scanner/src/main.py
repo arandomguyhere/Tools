@@ -107,14 +107,20 @@ Examples:
 
     parser.add_argument(
         '-m', '--mode',
-        choices=['free', 'file', 'both'],
+        choices=['free', 'file', 'hunt', 'both'],
         default='free',
-        help='Scan mode: free (online sources), file (local file), both'
+        help='Scan mode: free (static sources), file (local), hunt (GitHub discovery), both'
     )
 
     parser.add_argument(
         '-f', '--proxy-file',
         help='Proxy list file (required for file/both modes)'
+    )
+
+    parser.add_argument(
+        '--hunt',
+        action='store_true',
+        help='Enable GitHub repository hunting (discovers new sources)'
     )
 
     parser.add_argument(
@@ -211,9 +217,17 @@ def main():
     # Create output directory
     os.makedirs(args.output, exist_ok=True)
 
+    # Determine if hunting is enabled
+    use_hunter = args.hunt or args.mode == 'hunt'
+
     # Print settings
     if not args.quiet:
-        print(f"Mode: {args.mode}" + (" (async)" if args.async_mode else ""))
+        mode_display = args.mode
+        if use_hunter and args.mode != 'hunt':
+            mode_display += " + hunt"
+        if args.async_mode:
+            mode_display += " (async)"
+        print(f"Mode: {mode_display}")
         if args.async_mode:
             print(f"Concurrency: {args.concurrency}")
         else:
@@ -221,6 +235,8 @@ def main():
         print(f"Output: {args.output}")
         if args.geo:
             print("Geolocation: enabled")
+        if use_hunter:
+            print("GitHub hunting: enabled")
         if args.proxy_file:
             print(f"Proxy file: {args.proxy_file}")
 
@@ -256,7 +272,8 @@ def main():
                 mode=args.mode,
                 output_dir=args.output,
                 validate=not args.no_validate,
-                proxy_file=args.proxy_file
+                proxy_file=args.proxy_file,
+                use_hunter=use_hunter
             )
 
         # Exit with appropriate code
