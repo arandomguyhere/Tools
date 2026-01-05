@@ -1,0 +1,48 @@
+# SOCKS5 Proxy Scanner Configuration
+# ===================================
+
+# Scanner settings
+scanner:
+  # Timeout for fetching proxy sources (seconds)
+  timeout: 15
+
+  # Custom proxy sources (in addition to built-in sources)
+  # Uncomment and add your own sources:
+  # sources:
+  #   - https://example.com/proxies.txt
+  #   - https://another-source.com/socks5.txt
+
+  # File containing additional proxy sources (one URL per line)
+  # sources_file: config/sources.txt
+
+# Validator settings
+validator:
+  # Timeout for proxy validation (seconds)
+  timeout: 5
+
+  # URLs to test HTTP connectivity through proxies
+  test_urls:
+    - http://httpbin.org/ip
+    - http://icanhazip.com
+
+  # Verify SSL certificates (set to true for stricter validation)
+  verify_ssl: false
+
+# Output settings
+output:
+  # Default output directory
+  directory: ./results
+
+  # Save detailed JSON results
+  save_json: true
+
+  # Save plain text proxy lists
+  save_txt: true
+
+# Performance settings
+performance:
+  # Default number of validation threads
+  default_threads: 20
+
+  # Maximum threads allowed
+  max_threads: 100
