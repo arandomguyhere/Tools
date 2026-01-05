@@ -1,0 +1,2 @@
+# Placeholder - updated by GitHub Actions
+# Run the scan workflow to populate
