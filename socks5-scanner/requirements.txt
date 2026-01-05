@@ -1,0 +1,13 @@
+# SOCKS5 Proxy Scanner Dependencies
+# ==================================
+
+# Core dependencies
+requests>=2.28.0
+PySocks>=1.7.1
+PyYAML>=6.0
+
+# Async support (for --async mode)
+aiohttp>=3.8.0
+
+# Optional: Rich terminal output
+rich>=13.0.0
