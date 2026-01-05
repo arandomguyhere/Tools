@@ -93,9 +93,10 @@ def parse_args():
 Examples:
   %(prog)s                          Scan free sources with defaults
   %(prog)s -t 50                    Scan with 50 threads
+  %(prog)s --async -c 200           Async mode with 200 concurrent
+  %(prog)s --geo                    Include geolocation lookup
   %(prog)s -m file -f proxies.txt   Test proxies from file
   %(prog)s -o ./my_results          Save to custom directory
-  %(prog)s --no-validate            Only collect, don't validate
         """
     )
 
@@ -121,6 +122,26 @@ Examples:
         type=int,
         default=20,
         help='Number of validation threads (default: 20)'
+    )
+
+    parser.add_argument(
+        '--async',
+        dest='async_mode',
+        action='store_true',
+        help='Use async mode for faster scanning (requires aiohttp)'
+    )
+
+    parser.add_argument(
+        '--concurrency',
+        type=int,
+        default=100,
+        help='Concurrency level for async mode (default: 100)'
+    )
+
+    parser.add_argument(
+        '--geo',
+        action='store_true',
+        help='Enable geolocation lookup for proxies'
     )
 
     parser.add_argument(
@@ -192,26 +213,51 @@ def main():
 
     # Print settings
     if not args.quiet:
-        print(f"Mode: {args.mode}")
-        print(f"Threads: {args.threads}")
+        print(f"Mode: {args.mode}" + (" (async)" if args.async_mode else ""))
+        if args.async_mode:
+            print(f"Concurrency: {args.concurrency}")
+        else:
+            print(f"Threads: {args.threads}")
         print(f"Output: {args.output}")
+        if args.geo:
+            print("Geolocation: enabled")
         if args.proxy_file:
             print(f"Proxy file: {args.proxy_file}")
 
-    # Initialize scanner with config
-    scanner_config = config.get('scanner', {})
-    scanner_config['validator'] = config.get('validator', {})
-    scanner = Socks5Scanner(scanner_config)
-
-    # Run scan
     try:
-        results = scanner.run_full_scan(
-            max_workers=args.threads,
-            mode=args.mode,
-            output_dir=args.output,
-            validate=not args.no_validate,
-            proxy_file=args.proxy_file
-        )
+        # Async mode
+        if args.async_mode:
+            try:
+                from src.async_scanner import AsyncSocks5Scanner
+                import asyncio
+            except ImportError as e:
+                print(f"{Color.red('Error:')} Async mode requires aiohttp: pip install aiohttp")
+                sys.exit(1)
+
+            scanner_config = config.get('scanner', {})
+            scanner_config['validator'] = config.get('validator', {})
+            scanner = AsyncSocks5Scanner(scanner_config)
+
+            results = asyncio.run(scanner.run_scan(
+                concurrency=args.concurrency,
+                output_dir=args.output,
+                validate=not args.no_validate,
+                geo_lookup=args.geo
+            ))
+
+        # Sync mode (default)
+        else:
+            scanner_config = config.get('scanner', {})
+            scanner_config['validator'] = config.get('validator', {})
+            scanner = Socks5Scanner(scanner_config)
+
+            results = scanner.run_full_scan(
+                max_workers=args.threads,
+                mode=args.mode,
+                output_dir=args.output,
+                validate=not args.no_validate,
+                proxy_file=args.proxy_file
+            )
 
         # Exit with appropriate code
         if results.get('stats', {}).get('working', 0) > 0:

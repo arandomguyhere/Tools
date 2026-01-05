@@ -300,3 +300,144 @@ def extract_proxies_from_text(text: str) -> List[str]:
             continue
 
     return list(set(proxies))  # Remove duplicates
+
+
+class GeoLocator:
+    """IP Geolocation lookup using free APIs."""
+
+    # Free geolocation APIs (no API key required)
+    GEOIP_APIS = [
+        "http://ip-api.com/json/{ip}?fields=status,country,countryCode,region,city,isp,org,as",
+        "https://ipwho.is/{ip}",
+    ]
+
+    def __init__(self, cache_enabled: bool = True):
+        self.cache: Dict[str, Dict] = {}
+        self.cache_enabled = cache_enabled
+
+    def lookup(self, ip: str, timeout: int = 3) -> Optional[Dict[str, Any]]:
+        """
+        Look up geolocation data for an IP address.
+
+        Returns dict with country, city, isp, etc. or None on failure.
+        """
+        if not validate_ip(ip):
+            return None
+
+        # Check cache first
+        if self.cache_enabled and ip in self.cache:
+            return self.cache[ip]
+
+        import requests
+
+        for api_template in self.GEOIP_APIS:
+            try:
+                url = api_template.format(ip=ip)
+                response = requests.get(url, timeout=timeout)
+
+                if response.status_code == 200:
+                    data = response.json()
+
+                    # Normalize response format
+                    geo_info = self._normalize_response(data)
+
+                    if geo_info:
+                        if self.cache_enabled:
+                            self.cache[ip] = geo_info
+                        return geo_info
+
+            except Exception:
+                continue
+
+        return None
+
+    def _normalize_response(self, data: Dict) -> Optional[Dict[str, Any]]:
+        """Normalize different API response formats."""
+        # ip-api.com format
+        if 'status' in data:
+            if data.get('status') == 'success':
+                return {
+                    'country': data.get('country', ''),
+                    'country_code': data.get('countryCode', ''),
+                    'region': data.get('region', ''),
+                    'city': data.get('city', ''),
+                    'isp': data.get('isp', ''),
+                    'org': data.get('org', ''),
+                    'asn': data.get('as', ''),
+                }
+            return None
+
+        # ipwho.is format
+        if 'success' in data:
+            if data.get('success'):
+                return {
+                    'country': data.get('country', ''),
+                    'country_code': data.get('country_code', ''),
+                    'region': data.get('region', ''),
+                    'city': data.get('city', ''),
+                    'isp': data.get('connection', {}).get('isp', ''),
+                    'org': data.get('connection', {}).get('org', ''),
+                    'asn': data.get('connection', {}).get('asn', ''),
+                }
+            return None
+
+        # Generic format (try common fields)
+        if 'country' in data or 'country_name' in data:
+            return {
+                'country': data.get('country') or data.get('country_name', ''),
+                'country_code': data.get('country_code', ''),
+                'region': data.get('region') or data.get('region_name', ''),
+                'city': data.get('city', ''),
+                'isp': data.get('isp', ''),
+                'org': data.get('org') or data.get('organization', ''),
+                'asn': data.get('asn', ''),
+            }
+
+        return None
+
+    def lookup_batch(self, ips: List[str], max_workers: int = 5,
+                     show_progress: bool = False) -> Dict[str, Dict]:
+        """
+        Look up geolocation for multiple IPs concurrently.
+
+        Returns dict mapping IP -> geo_info.
+        """
+        import concurrent.futures
+
+        results = {}
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+            future_to_ip = {executor.submit(self.lookup, ip): ip for ip in ips}
+
+            for future in concurrent.futures.as_completed(future_to_ip):
+                ip = future_to_ip[future]
+                try:
+                    geo_info = future.result()
+                    if geo_info:
+                        results[ip] = geo_info
+                except Exception:
+                    pass
+
+        return results
+
+
+def get_geo_info(ip: str) -> Optional[Dict[str, Any]]:
+    """Quick helper to get geolocation for a single IP."""
+    locator = GeoLocator()
+    return locator.lookup(ip)
+
+
+def format_geo_info(geo: Optional[Dict]) -> str:
+    """Format geolocation info as a short string."""
+    if not geo:
+        return "Unknown"
+
+    parts = []
+    if geo.get('city'):
+        parts.append(geo['city'])
+    if geo.get('country_code'):
+        parts.append(geo['country_code'])
+    elif geo.get('country'):
+        parts.append(geo['country'][:20])
+
+    return ", ".join(parts) if parts else "Unknown"

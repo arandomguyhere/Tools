@@ -19,18 +19,30 @@ from .utils import (
 class Socks5Scanner:
     """Scans and collects SOCKS5 proxies from various sources."""
 
-    # Default free proxy sources
+    # Default free proxy sources - comprehensive list
     DEFAULT_SOURCES = [
+        # Actively maintained GitHub lists
         "https://raw.githubusercontent.com/TheSpeedX/SOCKS-List/master/socks5.txt",
+        "https://raw.githubusercontent.com/monosans/proxy-list/main/proxies/socks5.txt",
         "https://raw.githubusercontent.com/hookzof/socks5_list/master/proxy.txt",
         "https://raw.githubusercontent.com/ShiftyTR/Proxy-List/master/socks5.txt",
-        "https://raw.githubusercontent.com/proxifly/free-proxy-list/main/proxies/protocols/socks5/data.txt",
-        "https://raw.githubusercontent.com/monosans/proxy-list/main/proxies/socks5.txt",
         "https://raw.githubusercontent.com/jetkai/proxy-list/main/online-proxies/txt/proxies-socks5.txt",
         "https://raw.githubusercontent.com/roosterkid/openproxylist/main/SOCKS5_RAW.txt",
+        "https://raw.githubusercontent.com/proxifly/free-proxy-list/main/proxies/protocols/socks5/data.txt",
+        "https://raw.githubusercontent.com/ErcinDedeworken/proxy-list/main/socks5.txt",
+        "https://raw.githubusercontent.com/ALIILAPRO/Proxy/main/socks5.txt",
+        "https://raw.githubusercontent.com/zloi-user/hideip.me/main/socks5.txt",
+        "https://raw.githubusercontent.com/r00tee/Proxy-List/main/Socks5.txt",
+        "https://raw.githubusercontent.com/MuRongPIG/Proxy-Master/main/socks5.txt",
+        "https://raw.githubusercontent.com/Zaeem20/FREE_PROXIES_LIST/master/socks5.txt",
+        "https://raw.githubusercontent.com/prxchk/proxy-list/main/socks5.txt",
+        "https://raw.githubusercontent.com/officialputuid/KangProxy/KangProxy/socks5/socks5.txt",
+        # API endpoints
         "https://api.proxyscrape.com/v2/?request=getproxies&protocol=socks5&timeout=10000&country=all",
         "https://www.proxy-list.download/api/v1/get?type=socks5",
+        "https://proxyspace.pro/socks5.txt",
         "https://spys.me/socks.txt",
+        "https://raw.githubusercontent.com/sunny9577/proxy-scraper/master/generated/socks5_proxies.txt",
     ]
 
     def __init__(self, config: Optional[Dict] = None):
