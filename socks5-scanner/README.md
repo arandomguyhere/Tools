@@ -12,17 +12,21 @@ A production-ready, high-performance SOCKS5 proxy scanner with automated updates
 
 ### Raw URLs (for tools/scripts)
 ```
-https://raw.githubusercontent.com/arandomguyhere/Tools/main/socks5-scanner/proxies/socks5.txt
+# Working proxies (fully tested)
+https://raw.githubusercontent.com/arandomguyhere/Tools/main/socks5-scanner/proxies/proxies_working.txt
+
+# Valid SOCKS5 (handshake verified)
+https://raw.githubusercontent.com/arandomguyhere/Tools/main/socks5-scanner/proxies/proxies_valid.txt
 ```
 
 ### Quick Fetch
 ```bash
 # Bash
-curl -s https://raw.githubusercontent.com/arandomguyhere/Tools/main/socks5-scanner/proxies/socks5.txt
+curl -s https://raw.githubusercontent.com/arandomguyhere/Tools/main/socks5-scanner/proxies/proxies_working.txt
 
 # Python
 import requests
-proxies = requests.get("https://raw.githubusercontent.com/arandomguyhere/Tools/main/socks5-scanner/proxies/socks5.txt").text.strip().split("\n")
+proxies = requests.get("https://raw.githubusercontent.com/arandomguyhere/Tools/main/socks5-scanner/proxies/proxies_working.txt").text.strip().split("\n")
 ```
 
 ---
@@ -235,8 +239,9 @@ The scanner runs every 6 hours via GitHub Actions:
 ### Output Files
 | File | Description |
 |------|-------------|
-| `proxies/socks5.txt` | Working proxies (tunnel verified) |
-| `proxies/socks5_valid.txt` | Valid SOCKS5 handshake |
+| `proxies/proxies_working.txt` | Working proxies (tunnel verified) |
+| `proxies/proxies_valid.txt` | Valid SOCKS5 handshake |
+| `proxies/results.json` | Full results with stats |
 
 ---
 
@@ -263,8 +268,9 @@ socks5-scanner/
 ├── docs/
 │   └── index.html            # Web UI
 ├── proxies/
-│   ├── socks5.txt            # Working proxies
-│   └── socks5_valid.txt      # Valid proxies
+│   ├── proxies_working.txt   # Working proxies
+│   ├── proxies_valid.txt     # Valid proxies
+│   └── results.json          # Full scan results
 ├── src/
 │   ├── core.py               # Types, enums, results
 │   ├── sync_scanner.py       # Sync scanner
