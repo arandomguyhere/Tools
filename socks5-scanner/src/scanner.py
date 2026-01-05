@@ -1,11 +1,15 @@
 """
 SOCKS5 Proxy Scanner - Collects proxies from multiple sources.
+
+Supports multiple modes:
+- Static sources: Pre-configured proxy lists
+- Hunt mode: GitHub repository discovery (inspired by Proxy-Hound)
 """
 
 import concurrent.futures
 import os
 import time
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Optional, Set, Tuple
 
 import requests
 
@@ -152,31 +156,52 @@ class Socks5Scanner:
         print(f"Loaded {len(proxies)} proxies from {filepath}")
         return proxies
 
+    def scan_with_hunter(self, show_progress: bool = True) -> Tuple[List[str], List]:
+        """
+        Hunt for proxies using GitHub repository discovery.
+
+        Returns (proxies, hunt_results)
+        """
+        try:
+            from .hunter import ProxyHunter
+        except ImportError as e:
+            print(f"{Color.red('Error:')} Hunter module not available: {e}")
+            return [], []
+
+        hunter = ProxyHunter()
+        return hunter.hunt(show_progress=show_progress)
+
     def run_full_scan(self,
                       max_workers: int = 20,
                       mode: str = 'free',
                       output_dir: str = './results',
                       validate: bool = True,
-                      proxy_file: Optional[str] = None) -> Dict:
+                      proxy_file: Optional[str] = None,
+                      use_hunter: bool = False) -> Dict:
         """
         Run a complete proxy scan and validation.
 
         Args:
             max_workers: Number of threads for validation
-            mode: Scan mode ('free', 'file', or 'both')
+            mode: Scan mode ('free', 'file', 'hunt', or 'both')
             output_dir: Directory to save results
             validate: Whether to validate proxies
             proxy_file: Path to proxy file (for 'file' mode)
+            use_hunter: Enable GitHub repository hunting
 
         Returns:
             Dictionary with scan results
         """
         timestamp = time.strftime("%Y%m%d_%H%M%S")
         all_proxies: Set[str] = set()
+        hunt_results = []
 
         print(f"\n{'='*60}")
         print(f"{Color.bold('SOCKS5 Proxy Scanner')}")
-        print(f"Mode: {mode} | Workers: {max_workers}")
+        mode_str = mode
+        if use_hunter:
+            mode_str += " + hunt"
+        print(f"Mode: {mode_str} | Workers: {max_workers}")
         print(f"{'='*60}")
 
         with Timer("Proxy collection") as timer:
@@ -188,6 +213,10 @@ class Socks5Scanner:
             if mode in ['file', 'both'] and proxy_file:
                 file_proxies = self.scan_from_file(proxy_file)
                 all_proxies.update(file_proxies)
+
+            if mode == 'hunt' or use_hunter:
+                hunt_proxies, hunt_results = self.scan_with_hunter()
+                all_proxies.update(hunt_proxies)
 
         proxy_list = list(all_proxies)
 
