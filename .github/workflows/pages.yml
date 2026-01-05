@@ -33,9 +33,11 @@ jobs:
 
       - name: Prepare site
         run: |
-          mkdir -p _site
-          cp -r socks5-scanner/docs/* _site/ 2>/dev/null || true
-          cp -r socks5-scanner/proxies/* _site/ 2>/dev/null || true
+          mkdir -p _site/socks5-scanner
+          cp -r socks5-scanner/docs/* _site/socks5-scanner/ 2>/dev/null || true
+          cp -r socks5-scanner/proxies/* _site/socks5-scanner/ 2>/dev/null || true
+          # Also create root redirect
+          echo '<html><head><meta http-equiv="refresh" content="0;url=socks5-scanner/"></head></html>' > _site/index.html
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
