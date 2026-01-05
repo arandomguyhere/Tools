@@ -112,6 +112,46 @@ jobs:
 
               print(f'Results: {results.total} scanned, {len(valid)} valid, {len(working)} working')
 
+              # Enrich with GeoIP data using a new session
+              print('Enriching with GeoIP data...')
+              enriched = []
+              async with aiohttp.ClientSession() as geo_session:
+                  for i, r in enumerate(working[:500]):  # Limit to 500 to avoid rate limits
+                      proxy_data = r.to_dict()
+                      ip = r.host or r.proxy.split(':')[0]
+
+                      # Try to get geo data from free API
+                      try:
+                          async with geo_session.get(
+                              f'http://ip-api.com/json/{ip}?fields=status,country,countryCode,city,isp,org,as',
+                              timeout=aiohttp.ClientTimeout(total=5)
+                          ) as geo_resp:
+                              if geo_resp.status == 200:
+                                  geo = await geo_resp.json()
+                                  if geo.get('status') == 'success':
+                                      proxy_data['geo'] = {
+                                          'country': geo.get('country'),
+                                          'country_code': geo.get('countryCode'),
+                                          'city': geo.get('city'),
+                                          'isp': geo.get('isp'),
+                                          'org': geo.get('org'),
+                                          'asn': geo.get('as', '').split()[0] if geo.get('as') else None,
+                                          'asn_org': ' '.join(geo.get('as', '').split()[1:]) if geo.get('as') else None,
+                                      }
+                          await asyncio.sleep(0.15)  # Rate limit: 45/min
+                      except Exception as e:
+                          pass
+
+                      enriched.append(proxy_data)
+                      if (i + 1) % 50 == 0:
+                          print(f'  GeoIP: {i + 1}/500 enriched')
+
+              # Add remaining without geo (if > 500)
+              for r in working[500:]:
+                  enriched.append(r.to_dict())
+
+              print(f'Enriched {len([e for e in enriched if e.get(\"geo\")])} proxies with geo data')
+
               # Save working proxies
               with open('proxies/proxies_working.txt', 'w') as f:
                   for r in working:
@@ -122,7 +162,7 @@ jobs:
                   for r in valid:
                       f.write(f'{r.proxy}\n')
 
-              # Save full results as JSON
+              # Save full results as JSON with geo data
               with open('proxies/results.json', 'w') as f:
                   json.dump({
                       'timestamp': datetime.utcnow().isoformat() + 'Z',
@@ -131,7 +171,7 @@ jobs:
                           'valid': len(valid),
                           'working': len(working),
                       },
-                      'proxies': [r.to_dict() for r in working]
+                      'proxies': enriched
                   }, f, indent=2, default=str)
 
           asyncio.run(main())
