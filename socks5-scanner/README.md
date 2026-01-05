@@ -1,56 +1,81 @@
 # SOCKS5 Proxy Scanner v2.0
 
-A production-ready, high-performance SOCKS5 proxy scanner with structured results and pipeline integration.
+[![Scan Status](https://github.com/arandomguyhere/Tools/actions/workflows/scan.yml/badge.svg)](https://github.com/arandomguyhere/Tools/actions/workflows/scan.yml)
+[![GitHub Pages](https://github.com/arandomguyhere/Tools/actions/workflows/pages.yml/badge.svg)](https://arandomguyhere.github.io/Tools/socks5-scanner/)
+
+A production-ready, high-performance SOCKS5 proxy scanner with automated updates and web UI.
+
+## Live Proxy List
+
+### Web Interface
+**[View Proxy List →](https://arandomguyhere.github.io/Tools/socks5-scanner/)**
+
+### Raw URLs (for tools/scripts)
+```
+https://raw.githubusercontent.com/arandomguyhere/Tools/main/socks5-scanner/proxies/socks5.txt
+```
+
+### Quick Fetch
+```bash
+# Bash
+curl -s https://raw.githubusercontent.com/arandomguyhere/Tools/main/socks5-scanner/proxies/socks5.txt
+
+# Python
+import requests
+proxies = requests.get("https://raw.githubusercontent.com/arandomguyhere/Tools/main/socks5-scanner/proxies/socks5.txt").text.strip().split("\n")
+```
+
+---
 
 ## Features
 
-### Core Capabilities
-- **Sync and Async modes**: Choose based on your use case
-- **Structured results**: Full `ProxyResult` objects with error categorization
-- **Error classification**: 15+ error categories (timeout, DNS, protocol mismatch, etc.)
-- **Configurable timeouts**: Per-stage timeouts (connect/read/write/http)
-- **Retry logic**: Configurable retries with exponential backoff
+### Automated Scanning
+- **Runs every 6 hours** via GitHub Actions
+- Scans **20+ public proxy sources**
+- Auto-commits working proxies
+- Web UI auto-updates
 
-### Performance
-- **Semaphore-controlled concurrency**: Precise control over parallel connections
-- **Optional uvloop**: Faster event loop on Linux/macOS
-- **Streaming results**: Memory-efficient for large scans
+### Scanner Capabilities
+| Feature | Description |
+|---------|-------------|
+| **Sync & Async modes** | Thread-pool or asyncio with semaphore |
+| **Structured results** | Full `ProxyResult` objects |
+| **Error classification** | 15+ error categories |
+| **Configurable timeouts** | Per-stage (connect/read/write/http) |
+| **Retry logic** | Exponential backoff |
+| **Export formats** | JSON, CSV, TXT |
+| **Pipeline hooks** | Callbacks, filters, webhooks |
 
-### Integration
-- **JSON/CSV/TXT export**: Multiple output formats
-- **Pipeline hooks**: Callbacks, filters, streaming, webhooks
-- **Feed interfaces**: File, URL, and custom source adapters
-- **Logging infrastructure**: Debug/info/warn levels with color support
+---
 
 ## Installation
 
 ```bash
-cd socks5-scanner
+git clone https://github.com/arandomguyhere/Tools.git
+cd Tools/socks5-scanner
 pip install -r requirements.txt
 ```
 
-## Quick Start
-
-### CLI Usage
+## CLI Usage
 
 ```bash
-# Scan proxies from file (sync mode)
+# Scan proxies from file
 python -m src.cli scan proxies.txt
 
-# Async mode (faster) with 200 concurrent connections
+# Async mode (faster) with 200 concurrent
 python -m src.cli scan proxies.txt --async -c 200
 
 # Test a single proxy
 python -m src.cli test 1.2.3.4:1080 --verbose
 
-# Fetch from default sources and scan
+# Fetch from default sources
 python -m src.cli fetch --sources default --async
 ```
 
-### Python API
+## Python API
 
+### Sync Scanner
 ```python
-# Sync scanning
 from src import SyncScanner, ScanConfig
 
 config = ScanConfig(
@@ -60,17 +85,15 @@ config = ScanConfig(
 )
 
 with SyncScanner(config) as scanner:
-    # Single proxy
     result = scanner.scan_one("1.2.3.4:1080")
     print(result.to_dict())
 
-    # Multiple proxies
     results = scanner.scan_many(proxy_list)
     print(f"Working: {results.working}/{results.total}")
 ```
 
+### Async Scanner
 ```python
-# Async scanning (faster)
 from src import AsyncScanner
 import asyncio
 
@@ -82,16 +105,15 @@ async def scan():
 results = asyncio.run(scan())
 ```
 
+---
+
 ## Structured Results
 
 Every scan returns structured `ProxyResult` objects:
 
-```python
+```json
 {
     "proxy": "1.2.3.4:1080",
-    "host": "1.2.3.4",
-    "port": 1080,
-    "protocol": "socks5",
     "reachable": true,
     "socks5_valid": true,
     "tunnel_works": true,
@@ -99,7 +121,6 @@ Every scan returns structured `ProxyResult` objects:
     "latency_ms": 85,
     "error": null,
     "error_category": null,
-    "external_ip": "1.2.3.4",
     "timing": {
         "connect_ms": 12,
         "handshake_ms": 8,
@@ -111,21 +132,21 @@ Every scan returns structured `ProxyResult` objects:
 
 ## Error Categories
 
-Precise failure diagnosis with 15+ categories:
-
 | Category | Description |
 |----------|-------------|
 | `TIMEOUT_CONNECT` | Connection timeout |
 | `TIMEOUT_READ` | Read/recv timeout |
 | `DNS_FAILURE` | DNS resolution failed |
 | `NETWORK_UNREACHABLE` | Network/host unreachable |
-| `CONNECTION_REFUSED` | Connection actively refused |
-| `CONNECTION_RESET` | Connection reset by peer |
+| `CONNECTION_REFUSED` | Connection refused |
+| `CONNECTION_RESET` | Connection reset |
 | `HANDSHAKE_FAILED` | SOCKS5 handshake rejected |
-| `PROTOCOL_MISMATCH` | Not SOCKS5 or wrong version |
+| `PROTOCOL_MISMATCH` | Not SOCKS5 |
 | `AUTH_REQUIRED` | Authentication needed |
-| `PROXY_ERROR` | Proxy returned error code |
+| `PROXY_ERROR` | Proxy returned error |
 | `HTTP_ERROR` | HTTP test failed |
+
+---
 
 ## Configuration
 
@@ -139,7 +160,7 @@ config = ScanConfig(
     write_timeout=5.0,
     http_timeout=10.0,
 
-    # Retry settings
+    # Retry
     max_retries=1,
     retry_delay=0.5,
 
@@ -153,14 +174,14 @@ config = ScanConfig(
 )
 ```
 
+---
+
 ## Export & Integration
 
 ### Export Formats
-
 ```python
 from src import export_results
 
-# Export in multiple formats
 saved = export_results(
     results,
     output_dir="./results",
@@ -169,7 +190,6 @@ saved = export_results(
 ```
 
 ### Pipeline Hooks
-
 ```python
 from src import ProxyPipeline, FilterHook, StreamingHook
 
@@ -177,28 +197,50 @@ pipeline = ProxyPipeline()
 pipeline.add_hook(FilterHook(working_only=True, max_latency=1000))
 pipeline.add_hook(StreamingHook("working_proxies.txt"))
 
-# Process results through pipeline
 for result in results.results:
     pipeline.process(result)
-
-pipeline.finalize(results)
 ```
 
 ### Feed Interfaces
-
 ```python
 from src import FileFeed, URLFeed, MultiFeed
 
-# Combine multiple sources
 feed = MultiFeed([
     FileFeed("local_proxies.txt"),
     URLFeed("https://example.com/proxies.txt"),
 ])
-
 proxies = feed.fetch()
 ```
 
-## Performance Comparison
+---
+
+## CI/CD
+
+### Automated Scanning
+The scanner runs every 6 hours via GitHub Actions:
+
+| Schedule | UTC Time |
+|----------|----------|
+| Run 1 | 00:00 |
+| Run 2 | 06:00 |
+| Run 3 | 12:00 |
+| Run 4 | 18:00 |
+
+### Manual Trigger
+1. Go to **Actions** tab
+2. Select **SOCKS5 Proxy Scan**
+3. Click **Run workflow**
+4. Configure concurrency/timeout if needed
+
+### Output Files
+| File | Description |
+|------|-------------|
+| `proxies/socks5.txt` | Working proxies (tunnel verified) |
+| `proxies/socks5_valid.txt` | Valid SOCKS5 handshake |
+
+---
+
+## Performance
 
 | Mode | Concurrency | 5000 proxies |
 |------|-------------|--------------|
@@ -208,44 +250,57 @@ proxies = feed.fetch()
 | Async | 200 concurrent | ~25 sec |
 | Async + uvloop | 200 concurrent | ~20 sec |
 
-## Legacy Features
+---
 
-The v1 API is still available for compatibility:
+## Architecture
+
+```
+socks5-scanner/
+├── .github/
+│   └── workflows/
+│       ├── scan.yml          # Automated scanning
+│       └── pages.yml         # GitHub Pages deploy
+├── docs/
+│   └── index.html            # Web UI
+├── proxies/
+│   ├── socks5.txt            # Working proxies
+│   └── socks5_valid.txt      # Valid proxies
+├── src/
+│   ├── core.py               # Types, enums, results
+│   ├── sync_scanner.py       # Sync scanner
+│   ├── async_scanner_v2.py   # Async scanner
+│   ├── logger.py             # Logging
+│   ├── export.py             # Export & hooks
+│   ├── cli.py                # CLI interface
+│   ├── scanner.py            # Source collection
+│   ├── validator.py          # Validation
+│   ├── hunter.py             # GitHub discovery
+│   └── utils.py              # Utilities
+├── requirements.txt
+└── README.md
+```
+
+---
+
+## Legacy Features
 
 ```python
 # GitHub hunting (discovers new proxy sources)
 from src import ProxyHunter
-
 hunter = ProxyHunter()
 proxies, results = hunter.hunt()
 
 # IP enrichment (ASN, geo, ownership)
 from src import IPEnricher
-
 enricher = IPEnricher()
 info = enricher.enrich("1.2.3.4")
-# Returns: country, city, asn, isp, is_datacenter, etc.
 
 # Quick scan from static sources
 from src import quick_scan
 results = quick_scan()
 ```
 
-## Architecture
-
-```
-src/
-├── core.py           # Types, enums, structured results
-├── sync_scanner.py   # Synchronous scanner with thread pool
-├── async_scanner_v2.py # Async scanner with semaphore control
-├── logger.py         # Logging infrastructure
-├── export.py         # Export formats and hooks
-├── cli.py            # Unified CLI
-├── scanner.py        # Legacy: Source collection
-├── validator.py      # Legacy: Proxy validation
-├── hunter.py         # Legacy: GitHub discovery
-└── utils.py          # Legacy: Utilities
-```
+---
 
 ## CLI Reference
 
@@ -258,7 +313,7 @@ Commands:
   fetch     Fetch and scan from sources
   version   Show version info
 
-Scan options:
+Scan Options:
   -o, --output DIR      Output directory
   -f, --format FMT      Output formats (json, csv, txt, detailed)
   --async               Use async scanner
@@ -268,6 +323,12 @@ Scan options:
   --retries N           Retry count
 ```
 
+---
+
 ## License
 
 MIT License
+
+## Disclaimer
+
+Proxies are collected from public sources. Use at your own risk. No guarantees of uptime, speed, or anonymity.
