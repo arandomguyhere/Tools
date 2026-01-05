@@ -1,35 +1,47 @@
 """
-RTT Fingerprinting Module - Detect proxies via timing analysis.
+Proxy Quality Fingerprinting - Assess proxy quality via timing analysis.
 
-Based on research showing that proxied connections exhibit:
-- Higher RTT variance (jitter)
-- RTT inflation compared to geo-expected values
-- Distinct patterns in handshake vs data transfer timing
+Measures:
+- Latency stability and jitter
+- Estimated hop count (proxy chain depth)
+- Proxy type classification (residential vs datacenter)
+- Overall quality scoring
 
-References:
-- "Aroma: Automatic Detection of Web Proxies" (academic research)
-- TCP timestamp analysis techniques
+This helps identify:
+- High-quality low-latency proxies
+- Unstable/unreliable proxies
+- Proxy chains (multiple hops)
+- Residential vs datacenter proxies
 """
 
 import asyncio
 import logging
-import socket
 import statistics
 import struct
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional, List, Tuple, Dict, Any
+from typing import Optional, List, Dict, Any
 
 logger = logging.getLogger(__name__)
 
 
-class ProxyLikelihood(Enum):
-    """Likelihood that a connection is proxied."""
-    UNLIKELY = "unlikely"      # Direct connection likely
-    POSSIBLE = "possible"      # Some proxy indicators
-    LIKELY = "likely"          # Strong proxy indicators
-    VERY_LIKELY = "very_likely"  # Very strong proxy indicators
+class ProxyType(Enum):
+    """Proxy type based on RTT characteristics."""
+    UNKNOWN = "unknown"
+    DATACENTER = "datacenter"      # Low, stable RTT
+    RESIDENTIAL = "residential"    # Variable RTT, higher jitter
+    MOBILE = "mobile"              # High jitter, variable latency
+    PROXY_CHAIN = "proxy_chain"    # Very high latency, multiple hops
+
+
+class QualityTier(Enum):
+    """Proxy quality tier."""
+    EXCELLENT = "excellent"   # Score >= 0.8
+    GOOD = "good"             # Score >= 0.6
+    FAIR = "fair"             # Score >= 0.4
+    POOR = "poor"             # Score >= 0.2
+    BAD = "bad"               # Score < 0.2
 
 
 @dataclass
@@ -41,8 +53,8 @@ class RTTSample:
 
 
 @dataclass
-class RTTFingerprint:
-    """RTT fingerprint analysis results."""
+class ProxyQualityProfile:
+    """Quality profile for a proxy based on RTT analysis."""
 
     target: str
     samples: List[RTTSample] = field(default_factory=list)
@@ -58,12 +70,16 @@ class RTTFingerprint:
     # Handshake vs data phase comparison
     handshake_rtt_ms: Optional[float] = None
     data_rtt_ms: Optional[float] = None
-    rtt_ratio: Optional[float] = None  # data_rtt / handshake_rtt
 
-    # Analysis results
-    proxy_likelihood: ProxyLikelihood = ProxyLikelihood.UNLIKELY
-    confidence: float = 0.0
-    indicators: List[str] = field(default_factory=list)
+    # Quality metrics
+    quality_score: float = 0.0
+    quality_tier: QualityTier = QualityTier.BAD
+    stability_score: float = 0.0
+    estimated_hops: int = 1
+    proxy_type: ProxyType = ProxyType.UNKNOWN
+
+    # Details
+    quality_factors: List[str] = field(default_factory=list)
 
     def add_sample(self, rtt_ms: float, stage: str = "unknown"):
         """Add RTT sample."""
@@ -99,77 +115,128 @@ class RTTFingerprint:
         if data_rtts:
             self.data_rtt_ms = statistics.mean(data_rtts)
 
-        if self.handshake_rtt_ms and self.data_rtt_ms and self.handshake_rtt_ms > 0:
-            self.rtt_ratio = self.data_rtt_ms / self.handshake_rtt_ms
-
-    def analyze(self) -> 'RTTFingerprint':
-        """Analyze RTT patterns for proxy indicators."""
+    def analyze(self) -> 'ProxyQualityProfile':
+        """Analyze RTT patterns to assess proxy quality."""
         self.compute_statistics()
-        self.indicators = []
-        score = 0.0
+        self.quality_factors = []
 
-        if not self.samples:
+        if not self.samples or not self.mean_rtt_ms:
             return self
 
-        # Indicator 1: High jitter (proxies add variable latency)
-        if self.jitter_ms and self.mean_rtt_ms:
+        # Calculate quality score (0-1, higher is better)
+        score = 1.0
+
+        # Factor 1: Latency penalty (lower is better)
+        # < 100ms: excellent, 100-300ms: good, 300-500ms: fair, >500ms: poor
+        if self.mean_rtt_ms < 100:
+            self.quality_factors.append(f"Excellent latency: {self.mean_rtt_ms:.0f}ms")
+        elif self.mean_rtt_ms < 300:
+            score -= 0.15
+            self.quality_factors.append(f"Good latency: {self.mean_rtt_ms:.0f}ms")
+        elif self.mean_rtt_ms < 500:
+            score -= 0.3
+            self.quality_factors.append(f"Fair latency: {self.mean_rtt_ms:.0f}ms")
+        else:
+            score -= 0.5
+            self.quality_factors.append(f"High latency: {self.mean_rtt_ms:.0f}ms")
+
+        # Factor 2: Stability (jitter penalty)
+        if self.jitter_ms and self.mean_rtt_ms > 0:
             jitter_ratio = self.jitter_ms / self.mean_rtt_ms
-            if jitter_ratio > 0.3:
-                self.indicators.append(f"High jitter ratio: {jitter_ratio:.2f}")
-                score += 0.25
-            elif jitter_ratio > 0.15:
-                self.indicators.append(f"Moderate jitter ratio: {jitter_ratio:.2f}")
-                score += 0.1
+            self.stability_score = max(0, 1 - jitter_ratio * 2)
 
-        # Indicator 2: RTT inflation (handshake vs data)
-        if self.rtt_ratio:
-            if self.rtt_ratio > 1.5:
-                self.indicators.append(f"RTT inflation: {self.rtt_ratio:.2f}x")
-                score += 0.25
-            elif self.rtt_ratio > 1.2:
-                self.indicators.append(f"Slight RTT inflation: {self.rtt_ratio:.2f}x")
-                score += 0.1
+            if jitter_ratio < 0.1:
+                self.quality_factors.append(f"Very stable (jitter: {self.jitter_ms:.1f}ms)")
+            elif jitter_ratio < 0.2:
+                score -= 0.1
+                self.quality_factors.append(f"Stable (jitter: {self.jitter_ms:.1f}ms)")
+            elif jitter_ratio < 0.3:
+                score -= 0.2
+                self.quality_factors.append(f"Moderate jitter: {self.jitter_ms:.1f}ms")
+            else:
+                score -= 0.35
+                self.quality_factors.append(f"High jitter: {self.jitter_ms:.1f}ms")
 
-        # Indicator 3: High absolute RTT (>500ms suggests proxy chain)
-        if self.mean_rtt_ms and self.mean_rtt_ms > 500:
-            self.indicators.append(f"High latency: {self.mean_rtt_ms:.0f}ms")
-            score += 0.15
-        elif self.mean_rtt_ms and self.mean_rtt_ms > 300:
-            self.indicators.append(f"Elevated latency: {self.mean_rtt_ms:.0f}ms")
-            score += 0.05
-
-        # Indicator 4: High variance (stddev > 50% of mean)
-        if self.stddev_rtt_ms and self.mean_rtt_ms and self.mean_rtt_ms > 0:
+        # Factor 3: Consistency (stddev penalty)
+        if self.stddev_rtt_ms and self.mean_rtt_ms > 0:
             cv = self.stddev_rtt_ms / self.mean_rtt_ms  # coefficient of variation
             if cv > 0.5:
-                self.indicators.append(f"High variance: CV={cv:.2f}")
-                score += 0.2
-            elif cv > 0.25:
-                self.indicators.append(f"Moderate variance: CV={cv:.2f}")
-                score += 0.1
+                score -= 0.15
+                self.quality_factors.append(f"Inconsistent: CV={cv:.2f}")
 
-        # Indicator 5: RTT steps (sudden jumps between samples)
-        if len(self.samples) >= 3:
-            rtts = [s.rtt_ms for s in self.samples]
-            jumps = [abs(rtts[i] - rtts[i-1]) for i in range(1, len(rtts))]
-            max_jump = max(jumps) if jumps else 0
-            if self.mean_rtt_ms and max_jump > self.mean_rtt_ms * 0.5:
-                self.indicators.append(f"RTT step detected: {max_jump:.0f}ms")
-                score += 0.15
+        # Estimate hop count based on latency
+        self._estimate_hops()
 
-        # Compute confidence and likelihood
-        self.confidence = min(score, 1.0)
+        # Classify proxy type
+        self._classify_type()
 
-        if self.confidence >= 0.7:
-            self.proxy_likelihood = ProxyLikelihood.VERY_LIKELY
-        elif self.confidence >= 0.5:
-            self.proxy_likelihood = ProxyLikelihood.LIKELY
-        elif self.confidence >= 0.25:
-            self.proxy_likelihood = ProxyLikelihood.POSSIBLE
+        # Final score
+        self.quality_score = max(0, min(1, score))
+
+        # Determine tier
+        if self.quality_score >= 0.8:
+            self.quality_tier = QualityTier.EXCELLENT
+        elif self.quality_score >= 0.6:
+            self.quality_tier = QualityTier.GOOD
+        elif self.quality_score >= 0.4:
+            self.quality_tier = QualityTier.FAIR
+        elif self.quality_score >= 0.2:
+            self.quality_tier = QualityTier.POOR
         else:
-            self.proxy_likelihood = ProxyLikelihood.UNLIKELY
+            self.quality_tier = QualityTier.BAD
 
         return self
+
+    def _estimate_hops(self):
+        """Estimate number of proxy hops based on latency."""
+        if not self.mean_rtt_ms:
+            self.estimated_hops = 1
+            return
+
+        # Rough estimation based on typical network latency
+        # Single hop: < 150ms, 2 hops: 150-400ms, 3+ hops: > 400ms
+        if self.mean_rtt_ms < 150:
+            self.estimated_hops = 1
+        elif self.mean_rtt_ms < 400:
+            self.estimated_hops = 2
+            self.quality_factors.append("Possible 2-hop chain")
+        elif self.mean_rtt_ms < 700:
+            self.estimated_hops = 3
+            self.quality_factors.append("Likely 3-hop chain")
+        else:
+            self.estimated_hops = 4
+            self.quality_factors.append("Multi-hop chain (4+)")
+
+    def _classify_type(self):
+        """Classify proxy type based on RTT patterns."""
+        if not self.mean_rtt_ms or not self.jitter_ms:
+            self.proxy_type = ProxyType.UNKNOWN
+            return
+
+        jitter_ratio = self.jitter_ms / self.mean_rtt_ms if self.mean_rtt_ms > 0 else 0
+
+        # Datacenter: Low latency, very stable
+        if self.mean_rtt_ms < 200 and jitter_ratio < 0.15:
+            self.proxy_type = ProxyType.DATACENTER
+            self.quality_factors.append("Type: Datacenter (stable, low latency)")
+
+        # Residential: Moderate latency, some jitter
+        elif jitter_ratio < 0.3 and self.mean_rtt_ms < 500:
+            self.proxy_type = ProxyType.RESIDENTIAL
+            self.quality_factors.append("Type: Residential (moderate jitter)")
+
+        # Mobile: High jitter
+        elif jitter_ratio > 0.3:
+            self.proxy_type = ProxyType.MOBILE
+            self.quality_factors.append("Type: Mobile/unstable (high jitter)")
+
+        # Proxy chain: Very high latency
+        elif self.mean_rtt_ms > 500:
+            self.proxy_type = ProxyType.PROXY_CHAIN
+            self.quality_factors.append("Type: Proxy chain (high latency)")
+
+        else:
+            self.proxy_type = ProxyType.UNKNOWN
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""
@@ -184,21 +251,23 @@ class RTTFingerprint:
             "jitter_ms": self.jitter_ms,
             "handshake_rtt_ms": self.handshake_rtt_ms,
             "data_rtt_ms": self.data_rtt_ms,
-            "rtt_ratio": self.rtt_ratio,
-            "proxy_likelihood": self.proxy_likelihood.value,
-            "confidence": self.confidence,
-            "indicators": self.indicators,
+            "quality_score": self.quality_score,
+            "quality_tier": self.quality_tier.value,
+            "stability_score": self.stability_score,
+            "estimated_hops": self.estimated_hops,
+            "proxy_type": self.proxy_type.value,
+            "quality_factors": self.quality_factors,
         }
 
 
-class RTTFingerprinter:
+class ProxyProfiler:
     """
-    Fingerprints connections via RTT analysis.
+    Profiles proxy quality via RTT analysis.
 
     Usage:
-        fingerprinter = RTTFingerprinter()
-        result = await fingerprinter.fingerprint("1.2.3.4", 1080)
-        print(f"Proxy likelihood: {result.proxy_likelihood}")
+        profiler = ProxyProfiler()
+        profile = await profiler.profile("1.2.3.4", 1080)
+        print(f"Quality: {profile.quality_tier.value}, Score: {profile.quality_score:.2f}")
     """
 
     def __init__(
@@ -209,7 +278,7 @@ class RTTFingerprinter:
         test_port: int = 80
     ):
         """
-        Initialize fingerprinter.
+        Initialize profiler.
 
         Args:
             sample_count: Number of RTT samples to collect
@@ -222,77 +291,29 @@ class RTTFingerprinter:
         self.test_host = test_host
         self.test_port = test_port
 
-    async def fingerprint(
-        self,
-        host: str,
-        port: int,
-        through_proxy: bool = True
-    ) -> RTTFingerprint:
+    async def profile(self, host: str, port: int) -> ProxyQualityProfile:
         """
-        Fingerprint a target via RTT analysis.
+        Profile a proxy's quality via RTT analysis.
 
         Args:
-            host: Target host (proxy IP or direct host)
-            port: Target port
-            through_proxy: If True, test through SOCKS5 proxy
+            host: Proxy host
+            port: Proxy port
 
         Returns:
-            RTTFingerprint with analysis results
+            ProxyQualityProfile with quality metrics
         """
-        result = RTTFingerprint(target=f"{host}:{port}")
+        profile = ProxyQualityProfile(target=f"{host}:{port}")
 
         try:
-            if through_proxy:
-                await self._collect_proxy_samples(result, host, port)
-            else:
-                await self._collect_direct_samples(result, host, port)
+            await self._collect_samples(profile, host, port)
         except Exception as e:
-            logger.debug(f"Fingerprinting failed for {host}:{port}: {e}")
+            logger.debug(f"Profiling failed for {host}:{port}: {e}")
 
-        return result.analyze()
+        return profile.analyze()
 
-    async def _collect_direct_samples(
+    async def _collect_samples(
         self,
-        result: RTTFingerprint,
-        host: str,
-        port: int
-    ):
-        """Collect RTT samples for direct TCP connection."""
-        for i in range(self.sample_count):
-            try:
-                start = time.perf_counter()
-
-                reader, writer = await asyncio.wait_for(
-                    asyncio.open_connection(host, port),
-                    timeout=self.timeout
-                )
-
-                connect_rtt = (time.perf_counter() - start) * 1000
-                result.add_sample(connect_rtt, "handshake")
-
-                # Send minimal data and measure response
-                start = time.perf_counter()
-                writer.write(b"HEAD / HTTP/1.0\r\n\r\n")
-                await writer.drain()
-                await asyncio.wait_for(reader.read(1), timeout=self.timeout)
-                data_rtt = (time.perf_counter() - start) * 1000
-                result.add_sample(data_rtt, "data")
-
-                writer.close()
-                await writer.wait_closed()
-
-            except asyncio.TimeoutError:
-                logger.debug(f"Timeout on sample {i+1}")
-            except Exception as e:
-                logger.debug(f"Error on sample {i+1}: {e}")
-
-            # Small delay between samples
-            if i < self.sample_count - 1:
-                await asyncio.sleep(0.1)
-
-    async def _collect_proxy_samples(
-        self,
-        result: RTTFingerprint,
+        profile: ProxyQualityProfile,
         proxy_host: str,
         proxy_port: int
     ):
@@ -308,7 +329,7 @@ class RTTFingerprinter:
                 )
 
                 tcp_rtt = (time.perf_counter() - start) * 1000
-                result.add_sample(tcp_rtt, "handshake")
+                profile.add_sample(tcp_rtt, "handshake")
 
                 # SOCKS5 handshake
                 start = time.perf_counter()
@@ -317,7 +338,7 @@ class RTTFingerprinter:
 
                 response = await asyncio.wait_for(reader.read(2), timeout=self.timeout)
                 handshake_rtt = (time.perf_counter() - start) * 1000
-                result.add_sample(handshake_rtt, "handshake")
+                profile.add_sample(handshake_rtt, "handshake")
 
                 if len(response) < 2 or response[0] != 0x05:
                     writer.close()
@@ -342,7 +363,7 @@ class RTTFingerprinter:
                 # Read CONNECT response
                 response = await asyncio.wait_for(reader.read(10), timeout=self.timeout)
                 connect_rtt = (time.perf_counter() - start) * 1000
-                result.add_sample(connect_rtt, "data")
+                profile.add_sample(connect_rtt, "data")
 
                 if len(response) >= 2 and response[0] == 0x05 and response[1] == 0x00:
                     # Connection established, send HTTP request
@@ -351,7 +372,7 @@ class RTTFingerprinter:
                     await writer.drain()
                     await asyncio.wait_for(reader.read(1), timeout=self.timeout)
                     http_rtt = (time.perf_counter() - start) * 1000
-                    result.add_sample(http_rtt, "data")
+                    profile.add_sample(http_rtt, "data")
 
                 writer.close()
                 await writer.wait_closed()
@@ -365,69 +386,21 @@ class RTTFingerprinter:
             if i < self.sample_count - 1:
                 await asyncio.sleep(0.1)
 
-    def fingerprint_sync(self, host: str, port: int, through_proxy: bool = True) -> RTTFingerprint:
-        """Synchronous version of fingerprint."""
+    def profile_sync(self, host: str, port: int) -> ProxyQualityProfile:
+        """Synchronous version of profile."""
         return asyncio.get_event_loop().run_until_complete(
-            self.fingerprint(host, port, through_proxy)
+            self.profile(host, port)
         )
 
 
-class TCPTimestampAnalyzer:
-    """
-    Analyzes TCP timestamps to detect proxy behavior.
-
-    TCP timestamps can reveal:
-    - Different system clocks (proxy vs origin)
-    - Timestamp discontinuities
-    - Mismatched timing patterns
-    """
-
-    def __init__(self):
-        self.samples: List[Tuple[int, int]] = []  # (tsval, tsecr)
-
-    def add_sample(self, tsval: int, tsecr: int):
-        """Add TCP timestamp sample."""
-        self.samples.append((tsval, tsecr))
-
-    def analyze(self) -> Dict[str, Any]:
-        """Analyze timestamp patterns."""
-        if len(self.samples) < 2:
-            return {"status": "insufficient_samples"}
-
-        # Check for timestamp discontinuities
-        tsvals = [s[0] for s in self.samples]
-        deltas = [tsvals[i] - tsvals[i-1] for i in range(1, len(tsvals))]
-
-        # Large jumps may indicate different hosts
-        max_delta = max(deltas) if deltas else 0
-        min_delta = min(deltas) if deltas else 0
-
-        indicators = []
-        if max_delta > 0 and min_delta > 0 and max_delta / min_delta > 10:
-            indicators.append("Timestamp delta variance")
-
-        # Negative deltas indicate different hosts
-        if any(d < 0 for d in deltas):
-            indicators.append("Timestamp regression detected")
-
-        return {
-            "status": "analyzed",
-            "sample_count": len(self.samples),
-            "max_delta": max_delta,
-            "min_delta": min_delta,
-            "indicators": indicators,
-            "proxy_suspected": len(indicators) > 0
-        }
-
-
 # Utility function
-async def fingerprint_proxy(
+async def profile_proxy(
     proxy: str,
     sample_count: int = 5,
     timeout: float = 5.0
-) -> RTTFingerprint:
+) -> ProxyQualityProfile:
     """
-    Convenience function to fingerprint a proxy.
+    Convenience function to profile a proxy.
 
     Args:
         proxy: Proxy in host:port format
@@ -435,13 +408,27 @@ async def fingerprint_proxy(
         timeout: Timeout per operation
 
     Returns:
-        RTTFingerprint with analysis
+        ProxyQualityProfile with quality metrics
     """
     try:
         host, port_str = proxy.rsplit(":", 1)
         port = int(port_str)
     except ValueError:
-        return RTTFingerprint(target=proxy)
+        return ProxyQualityProfile(target=proxy)
 
-    fingerprinter = RTTFingerprinter(sample_count=sample_count, timeout=timeout)
-    return await fingerprinter.fingerprint(host, port)
+    profiler = ProxyProfiler(sample_count=sample_count, timeout=timeout)
+    return await profiler.profile(host, port)
+
+
+# Backwards compatibility aliases
+RTTFingerprint = ProxyQualityProfile
+RTTFingerprinter = ProxyProfiler
+fingerprint_proxy = profile_proxy
+
+
+class ProxyLikelihood(Enum):
+    """Deprecated: Use QualityTier instead."""
+    UNLIKELY = "unlikely"
+    POSSIBLE = "possible"
+    LIKELY = "likely"
+    VERY_LIKELY = "very_likely"

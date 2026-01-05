@@ -143,23 +143,32 @@ class TestGeoIPModule:
 
 
 class TestFingerprintModule:
-    """Tests for RTT fingerprinting module."""
+    """Tests for proxy quality profiling module."""
 
     def test_import(self):
         from src.fingerprint import (
-            RTTFingerprint, RTTFingerprinter, RTTSample,
-            ProxyLikelihood, fingerprint_proxy
+            ProxyQualityProfile, ProxyProfiler, RTTSample,
+            QualityTier, ProxyType, profile_proxy
         )
-        assert RTTFingerprint is not None
-        assert RTTFingerprinter is not None
+        assert ProxyQualityProfile is not None
+        assert ProxyProfiler is not None
 
-    def test_proxy_likelihood_enum(self):
-        from src.fingerprint import ProxyLikelihood
+    def test_quality_tier_enum(self):
+        from src.fingerprint import QualityTier
 
-        assert ProxyLikelihood.UNLIKELY.value == "unlikely"
-        assert ProxyLikelihood.POSSIBLE.value == "possible"
-        assert ProxyLikelihood.LIKELY.value == "likely"
-        assert ProxyLikelihood.VERY_LIKELY.value == "very_likely"
+        assert QualityTier.EXCELLENT.value == "excellent"
+        assert QualityTier.GOOD.value == "good"
+        assert QualityTier.FAIR.value == "fair"
+        assert QualityTier.POOR.value == "poor"
+        assert QualityTier.BAD.value == "bad"
+
+    def test_proxy_type_enum(self):
+        from src.fingerprint import ProxyType
+
+        assert ProxyType.DATACENTER.value == "datacenter"
+        assert ProxyType.RESIDENTIAL.value == "residential"
+        assert ProxyType.MOBILE.value == "mobile"
+        assert ProxyType.PROXY_CHAIN.value == "proxy_chain"
 
     def test_rtt_sample(self):
         from src.fingerprint import RTTSample
@@ -168,139 +177,117 @@ class TestFingerprintModule:
         assert sample.rtt_ms == 100.5
         assert sample.stage == "handshake"
 
-    def test_rtt_fingerprint_creation(self):
-        from src.fingerprint import RTTFingerprint, ProxyLikelihood
+    def test_quality_profile_creation(self):
+        from src.fingerprint import ProxyQualityProfile, QualityTier
 
-        fp = RTTFingerprint(target="1.2.3.4:1080")
-        assert fp.target == "1.2.3.4:1080"
-        assert fp.proxy_likelihood == ProxyLikelihood.UNLIKELY
-        assert fp.confidence == 0.0
-        assert len(fp.samples) == 0
+        profile = ProxyQualityProfile(target="1.2.3.4:1080")
+        assert profile.target == "1.2.3.4:1080"
+        assert profile.quality_tier == QualityTier.BAD
+        assert profile.quality_score == 0.0
+        assert len(profile.samples) == 0
 
-    def test_rtt_fingerprint_add_sample(self):
-        from src.fingerprint import RTTFingerprint
+    def test_quality_profile_add_sample(self):
+        from src.fingerprint import ProxyQualityProfile
 
-        fp = RTTFingerprint(target="1.2.3.4:1080")
-        fp.add_sample(100.0, "handshake")
-        fp.add_sample(150.0, "data")
+        profile = ProxyQualityProfile(target="1.2.3.4:1080")
+        profile.add_sample(100.0, "handshake")
+        profile.add_sample(150.0, "data")
 
-        assert len(fp.samples) == 2
-        assert fp.samples[0].rtt_ms == 100.0
-        assert fp.samples[0].stage == "handshake"
+        assert len(profile.samples) == 2
+        assert profile.samples[0].rtt_ms == 100.0
+        assert profile.samples[0].stage == "handshake"
 
-    def test_rtt_fingerprint_compute_statistics(self):
-        from src.fingerprint import RTTFingerprint
+    def test_quality_profile_compute_statistics(self):
+        from src.fingerprint import ProxyQualityProfile
 
-        fp = RTTFingerprint(target="1.2.3.4:1080")
-        fp.add_sample(100.0, "handshake")
-        fp.add_sample(120.0, "handshake")
-        fp.add_sample(200.0, "data")
-        fp.add_sample(220.0, "data")
+        profile = ProxyQualityProfile(target="1.2.3.4:1080")
+        profile.add_sample(100.0, "handshake")
+        profile.add_sample(120.0, "handshake")
+        profile.add_sample(200.0, "data")
+        profile.add_sample(220.0, "data")
 
-        fp.compute_statistics()
+        profile.compute_statistics()
 
-        assert fp.min_rtt_ms == 100.0
-        assert fp.max_rtt_ms == 220.0
-        assert fp.mean_rtt_ms == 160.0
-        assert fp.handshake_rtt_ms == 110.0  # (100 + 120) / 2
-        assert fp.data_rtt_ms == 210.0  # (200 + 220) / 2
+        assert profile.min_rtt_ms == 100.0
+        assert profile.max_rtt_ms == 220.0
+        assert profile.mean_rtt_ms == 160.0
+        assert profile.handshake_rtt_ms == 110.0  # (100 + 120) / 2
+        assert profile.data_rtt_ms == 210.0  # (200 + 220) / 2
 
-    def test_rtt_fingerprint_analyze(self):
-        from src.fingerprint import RTTFingerprint, ProxyLikelihood
+    def test_quality_profile_analyze_excellent(self):
+        from src.fingerprint import ProxyQualityProfile, QualityTier, ProxyType
 
-        # Create fingerprint with high variance (proxy indicator)
-        fp = RTTFingerprint(target="1.2.3.4:1080")
-        fp.add_sample(50.0, "handshake")
-        fp.add_sample(100.0, "handshake")
-        fp.add_sample(300.0, "data")
-        fp.add_sample(400.0, "data")
+        # Create profile with excellent metrics (low latency, low jitter)
+        profile = ProxyQualityProfile(target="1.2.3.4:1080")
+        profile.add_sample(50.0, "handshake")
+        profile.add_sample(52.0, "handshake")
+        profile.add_sample(55.0, "data")
+        profile.add_sample(53.0, "data")
 
-        fp.analyze()
+        profile.analyze()
 
-        # Should detect proxy indicators due to RTT inflation
-        assert fp.confidence > 0
-        assert len(fp.indicators) > 0
+        # Should have high quality score
+        assert profile.quality_score >= 0.8
+        assert profile.quality_tier == QualityTier.EXCELLENT
+        assert profile.proxy_type == ProxyType.DATACENTER
+        assert profile.estimated_hops == 1
 
-    def test_rtt_fingerprint_to_dict(self):
-        from src.fingerprint import RTTFingerprint
+    def test_quality_profile_analyze_poor(self):
+        from src.fingerprint import ProxyQualityProfile, QualityTier
 
-        fp = RTTFingerprint(target="1.2.3.4:1080")
-        fp.add_sample(100.0, "handshake")
-        fp.analyze()
+        # Create profile with poor metrics (high latency, high jitter)
+        profile = ProxyQualityProfile(target="1.2.3.4:1080")
+        profile.add_sample(500.0, "handshake")
+        profile.add_sample(800.0, "handshake")
+        profile.add_sample(600.0, "data")
+        profile.add_sample(900.0, "data")
 
-        d = fp.to_dict()
+        profile.analyze()
+
+        # Should have low quality score
+        assert profile.quality_score < 0.5
+        assert profile.quality_tier in [QualityTier.FAIR, QualityTier.POOR, QualityTier.BAD]
+        assert profile.estimated_hops >= 2
+
+    def test_quality_profile_to_dict(self):
+        from src.fingerprint import ProxyQualityProfile
+
+        profile = ProxyQualityProfile(target="1.2.3.4:1080")
+        profile.add_sample(100.0, "handshake")
+        profile.analyze()
+
+        d = profile.to_dict()
         assert d["target"] == "1.2.3.4:1080"
         assert d["sample_count"] == 1
-        assert "proxy_likelihood" in d
-        assert "confidence" in d
+        assert "quality_score" in d
+        assert "quality_tier" in d
+        assert "proxy_type" in d
+        assert "estimated_hops" in d
 
-    def test_fingerprinter_creation(self):
-        from src.fingerprint import RTTFingerprinter
+    def test_profiler_creation(self):
+        from src.fingerprint import ProxyProfiler
 
-        fp = RTTFingerprinter(sample_count=3, timeout=2.0)
-        assert fp.sample_count == 3
-        assert fp.timeout == 2.0
+        profiler = ProxyProfiler(sample_count=3, timeout=2.0)
+        assert profiler.sample_count == 3
+        assert profiler.timeout == 2.0
 
     @pytest.mark.asyncio
-    async def test_fingerprint_proxy_function(self):
-        from src.fingerprint import fingerprint_proxy
+    async def test_profile_proxy_function(self):
+        from src.fingerprint import profile_proxy
 
-        # Test with invalid proxy (should return empty fingerprint)
-        result = await fingerprint_proxy("invalid", sample_count=1, timeout=1.0)
+        # Test with invalid proxy (should return empty profile)
+        result = await profile_proxy("invalid", sample_count=1, timeout=1.0)
         assert result.target == "invalid"
         assert len(result.samples) == 0
 
+    def test_backwards_compatibility_aliases(self):
+        from src.fingerprint import RTTFingerprint, RTTFingerprinter, fingerprint_proxy
+        from src.fingerprint import ProxyQualityProfile, ProxyProfiler, profile_proxy
 
-class TestTCPTimestampAnalyzer:
-    """Tests for TCP timestamp analyzer."""
-
-    def test_creation(self):
-        from src.fingerprint import TCPTimestampAnalyzer
-
-        analyzer = TCPTimestampAnalyzer()
-        assert len(analyzer.samples) == 0
-
-    def test_add_sample(self):
-        from src.fingerprint import TCPTimestampAnalyzer
-
-        analyzer = TCPTimestampAnalyzer()
-        analyzer.add_sample(12345, 67890)
-        analyzer.add_sample(12350, 67895)
-
-        assert len(analyzer.samples) == 2
-
-    def test_analyze_insufficient_samples(self):
-        from src.fingerprint import TCPTimestampAnalyzer
-
-        analyzer = TCPTimestampAnalyzer()
-        analyzer.add_sample(12345, 67890)
-
-        result = analyzer.analyze()
-        assert result["status"] == "insufficient_samples"
-
-    def test_analyze_normal_timestamps(self):
-        from src.fingerprint import TCPTimestampAnalyzer
-
-        analyzer = TCPTimestampAnalyzer()
-        analyzer.add_sample(12345, 67890)
-        analyzer.add_sample(12350, 67895)
-        analyzer.add_sample(12355, 67900)
-
-        result = analyzer.analyze()
-        assert result["status"] == "analyzed"
-        assert result["sample_count"] == 3
-
-    def test_analyze_timestamp_regression(self):
-        from src.fingerprint import TCPTimestampAnalyzer
-
-        analyzer = TCPTimestampAnalyzer()
-        analyzer.add_sample(12345, 67890)
-        analyzer.add_sample(12340, 67895)  # Regression!
-        analyzer.add_sample(12335, 67900)
-
-        result = analyzer.analyze()
-        assert "Timestamp regression detected" in result["indicators"]
-        assert result["proxy_suspected"] is True
+        # Aliases should point to new classes
+        assert RTTFingerprint is ProxyQualityProfile
+        assert RTTFingerprinter is ProxyProfiler
+        assert fingerprint_proxy is profile_proxy
 
 
 class TestLegacyWrappers:
