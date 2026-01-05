@@ -1,0 +1,3974 @@
+{
+  "timestamp": "2026-01-05T09:31:01.164258Z",
+  "stats": {
+    "total": 1281,
+    "valid": 219,
+    "working": 197
+  },
+  "proxies": [
+    {
+      "proxy": "72.49.49.11:31034",
+      "host": "72.49.49.11",
+      "port": 31034,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 2343.5299396514893,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605382.3714364,
+      "timing": {
+        "connect_ms": 593.3856964111328,
+        "handshake_ms": 599.0262031555176,
+        "tunnel_ms": 1151.0250568389893,
+        "total_ms": 2343.5299396514893
+      }
+    },
+    {
+      "proxy": "47.250.159.65:8008",
+      "host": "47.250.159.65",
+      "port": 8008,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 5407.161474227905,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605382.3715248,
+      "timing": {
+        "connect_ms": 205.5370807647705,
+        "handshake_ms": 2200.51908493042,
+        "tunnel_ms": 3001.056671142578,
+        "total_ms": 5407.161474227905
+      }
+    },
+    {
+      "proxy": "217.173.31.28:1080",
+      "host": "217.173.31.28",
+      "port": 1080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 882.6406002044678,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605382.3715646,
+      "timing": {
+        "connect_ms": 218.48797798156738,
+        "handshake_ms": 289.3335819244385,
+        "tunnel_ms": 374.72057342529297,
+        "total_ms": 882.6406002044678
+      }
+    },
+    {
+      "proxy": "24.249.199.4:4145",
+      "host": "24.249.199.4",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 481.5633296966553,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605382.3716364,
+      "timing": {
+        "connect_ms": 145.33162117004395,
+        "handshake_ms": 127.32672691345215,
+        "tunnel_ms": 208.85181427001953,
+        "total_ms": 481.5633296966553
+      }
+    },
+    {
+      "proxy": "8.215.15.163:11",
+      "host": "8.215.15.163",
+      "port": 11,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 5379.349231719971,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605382.3717628,
+      "timing": {
+        "connect_ms": 192.28219985961914,
+        "handshake_ms": 2186.546564102173,
+        "tunnel_ms": 3000.471591949463,
+        "total_ms": 5379.349231719971
+      }
+    },
+    {
+      "proxy": "142.54.236.97:4145",
+      "host": "142.54.236.97",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 141.71695709228516,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605382.3717794,
+      "timing": {
+        "connect_ms": 27.827739715576172,
+        "handshake_ms": 23.157596588134766,
+        "tunnel_ms": 90.64817428588867,
+        "total_ms": 141.71695709228516
+      }
+    },
+    {
+      "proxy": "193.233.254.7:1080",
+      "host": "193.233.254.7",
+      "port": 1080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 656.5713882446289,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605382.3717935,
+      "timing": {
+        "connect_ms": 167.19436645507812,
+        "handshake_ms": 158.50043296813965,
+        "tunnel_ms": 330.81841468811035,
+        "total_ms": 656.5713882446289
+      }
+    },
+    {
+      "proxy": "192.252.214.20:15864",
+      "host": "192.252.214.20",
+      "port": 15864,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 345.6559181213379,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605382.3718266,
+      "timing": {
+        "connect_ms": 100.51465034484863,
+        "handshake_ms": 95.3984260559082,
+        "tunnel_ms": 149.6880054473877,
+        "total_ms": 345.6559181213379
+      }
+    },
+    {
+      "proxy": "47.238.134.126:5060",
+      "host": "47.238.134.126",
+      "port": 5060,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 5316.598653793335,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605382.3718464,
+      "timing": {
+        "connect_ms": 159.9130630493164,
+        "handshake_ms": 2155.6038856506348,
+        "tunnel_ms": 3001.0247230529785,
+        "total_ms": 5316.598653793335
+      }
+    },
+    {
+      "proxy": "184.178.172.13:15311",
+      "host": "184.178.172.13",
+      "port": 15311,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 450.23488998413086,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605382.3718688,
+      "timing": {
+        "connect_ms": 130.76210021972656,
+        "handshake_ms": 123.38733673095703,
+        "tunnel_ms": 196.03419303894043,
+        "total_ms": 450.23488998413086
+      }
+    },
+    {
+      "proxy": "98.175.31.195:4145",
+      "host": "98.175.31.195",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 701.819896697998,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605382.3720322,
+      "timing": {
+        "connect_ms": 214.03741836547852,
+        "handshake_ms": 201.4768123626709,
+        "tunnel_ms": 286.2226963043213,
+        "total_ms": 701.819896697998
+      }
+    },
+    {
+      "proxy": "8.213.197.208:9080",
+      "host": "8.213.197.208",
+      "port": 9080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 5410.978555679321,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605382.3721921,
+      "timing": {
+        "connect_ms": 202.86917686462402,
+        "handshake_ms": 2207.591772079468,
+        "tunnel_ms": 3000.469923019409,
+        "total_ms": 5410.978555679321
+      }
+    },
+    {
+      "proxy": "107.173.111.110:7890",
+      "host": "107.173.111.110",
+      "port": 7890,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 4220.334768295288,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605382.3722396,
+      "timing": {
+        "connect_ms": 1147.1834182739258,
+        "handshake_ms": 503.93104553222656,
+        "tunnel_ms": 2569.1304206848145,
+        "total_ms": 4220.334768295288
+      }
+    },
+    {
+      "proxy": "199.102.107.145:4145",
+      "host": "199.102.107.145",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 154.73175048828125,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605382.3723419,
+      "timing": {
+        "connect_ms": 30.81059455871582,
+        "handshake_ms": 22.76015281677246,
+        "tunnel_ms": 101.10306739807129,
+        "total_ms": 154.73175048828125
+      }
+    },
+    {
+      "proxy": "213.226.122.5:7788",
+      "host": "213.226.122.5",
+      "port": 7788,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 6475.986003875732,
+      "error": "Connection timeout",
+      "error_category": "TIMEOUT_CONNECT",
+      "error_stage": "connect",
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605382.3724635,
+      "timing": {
+        "connect_ms": 247.8199005126953,
+        "handshake_ms": 248.6128807067871,
+        "tunnel_ms": 476.99689865112305,
+        "total_ms": 6475.986003875732
+      }
+    },
+    {
+      "proxy": "194.163.182.6:1080",
+      "host": "194.163.182.6",
+      "port": 1080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 3241.5153980255127,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605382.3725615,
+      "timing": {
+        "connect_ms": 220.7472324371338,
+        "handshake_ms": 1614.6087646484375,
+        "tunnel_ms": 1406.0661792755127,
+        "total_ms": 3241.5153980255127
+      }
+    },
+    {
+      "proxy": "72.195.34.60:27391",
+      "host": "72.195.34.60",
+      "port": 27391,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 585.0496292114258,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605382.3726373,
+      "timing": {
+        "connect_ms": 137.68315315246582,
+        "handshake_ms": 146.34323120117188,
+        "tunnel_ms": 300.9676933288574,
+        "total_ms": 585.0496292114258
+      }
+    },
+    {
+      "proxy": "31.211.142.115:8192",
+      "host": "31.211.142.115",
+      "port": 8192,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 2716.181755065918,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605382.3726902,
+      "timing": {
+        "connect_ms": 2232.4743270874023,
+        "handshake_ms": 183.19129943847656,
+        "tunnel_ms": 300.4426956176758,
+        "total_ms": 2716.181755065918
+      }
+    },
+    {
+      "proxy": "72.195.34.41:4145",
+      "host": "72.195.34.41",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 435.3458881378174,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605382.3834152,
+      "timing": {
+        "connect_ms": 118.81780624389648,
+        "handshake_ms": 123.08692932128906,
+        "tunnel_ms": 193.33386421203613,
+        "total_ms": 435.3458881378174
+      }
+    },
+    {
+      "proxy": "192.252.211.197:14921",
+      "host": "192.252.211.197",
+      "port": 14921,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 337.9936218261719,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605382.513523,
+      "timing": {
+        "connect_ms": 95.34382820129395,
+        "handshake_ms": 95.66593170166016,
+        "tunnel_ms": 146.92211151123047,
+        "total_ms": 337.9936218261719
+      }
+    },
+    {
+      "proxy": "192.111.137.34:18765",
+      "host": "192.111.137.34",
+      "port": 18765,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 339.4203186035156,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605382.7493827,
+      "timing": {
+        "connect_ms": 94.96164321899414,
+        "handshake_ms": 94.75851058959961,
+        "tunnel_ms": 149.6257781982422,
+        "total_ms": 339.4203186035156
+      }
+    },
+    {
+      "proxy": "192.252.208.70:14282",
+      "host": "192.252.208.70",
+      "port": 14282,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 352.2493839263916,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605382.937606,
+      "timing": {
+        "connect_ms": 93.23740005493164,
+        "handshake_ms": 93.0635929107666,
+        "tunnel_ms": 165.89665412902832,
+        "total_ms": 352.2493839263916
+      }
+    },
+    {
+      "proxy": "24.249.199.12:4145",
+      "host": "24.249.199.12",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 538.1665229797363,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605383.0343862,
+      "timing": {
+        "connect_ms": 126.11913681030273,
+        "handshake_ms": 126.34921073913574,
+        "tunnel_ms": 285.62307357788086,
+        "total_ms": 538.1665229797363
+      }
+    },
+    {
+      "proxy": "192.111.129.145:16894",
+      "host": "192.111.129.145",
+      "port": 16894,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 344.1915512084961,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605383.0392697,
+      "timing": {
+        "connect_ms": 93.10698509216309,
+        "handshake_ms": 93.51444244384766,
+        "tunnel_ms": 157.48286247253418,
+        "total_ms": 344.1915512084961
+      }
+    },
+    {
+      "proxy": "184.178.172.17:4145",
+      "host": "184.178.172.17",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 446.7148780822754,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605383.2542324,
+      "timing": {
+        "connect_ms": 124.44710731506348,
+        "handshake_ms": 123.76809120178223,
+        "tunnel_ms": 198.4391212463379,
+        "total_ms": 446.7148780822754
+      }
+    },
+    {
+      "proxy": "110.235.255.245:1080",
+      "host": "110.235.255.245",
+      "port": 1080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 1953.7808895111084,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605383.7009723,
+      "timing": {
+        "connect_ms": 1241.8527603149414,
+        "handshake_ms": 227.05864906311035,
+        "tunnel_ms": 484.7393035888672,
+        "total_ms": 1953.7808895111084
+      }
+    },
+    {
+      "proxy": "192.111.139.162:4145",
+      "host": "192.111.139.162",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 347.90921211242676,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605383.7904513,
+      "timing": {
+        "connect_ms": 95.75629234313965,
+        "handshake_ms": 97.12004661560059,
+        "tunnel_ms": 154.94728088378906,
+        "total_ms": 347.90921211242676
+      }
+    },
+    {
+      "proxy": "8.209.96.245:89",
+      "host": "8.209.96.245",
+      "port": 89,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 5318.62473487854,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605383.9619334,
+      "timing": {
+        "connect_ms": 158.67924690246582,
+        "handshake_ms": 2159.040927886963,
+        "tunnel_ms": 3000.8440017700195,
+        "total_ms": 5318.62473487854
+      }
+    },
+    {
+      "proxy": "72.195.34.35:27360",
+      "host": "72.195.34.35",
+      "port": 27360,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 435.29438972473145,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605384.138392,
+      "timing": {
+        "connect_ms": 120.78428268432617,
+        "handshake_ms": 125.04386901855469,
+        "tunnel_ms": 189.3630027770996,
+        "total_ms": 435.29438972473145
+      }
+    },
+    {
+      "proxy": "31.129.147.102:1080",
+      "host": "31.129.147.102",
+      "port": 1080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 760.6005668640137,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605385.9593225,
+      "timing": {
+        "connect_ms": 186.08903884887695,
+        "handshake_ms": 263.4005546569824,
+        "tunnel_ms": 311.02728843688965,
+        "total_ms": 760.6005668640137
+      }
+    },
+    {
+      "proxy": "142.54.237.34:4145",
+      "host": "142.54.237.34",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 145.4620361328125,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605386.3518841,
+      "timing": {
+        "connect_ms": 21.970510482788086,
+        "handshake_ms": 23.707866668701172,
+        "tunnel_ms": 99.70903396606445,
+        "total_ms": 145.4620361328125
+      }
+    },
+    {
+      "proxy": "198.8.94.170:4145",
+      "host": "198.8.94.170",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 360.8245849609375,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605386.719954,
+      "timing": {
+        "connect_ms": 97.86176681518555,
+        "handshake_ms": 111.50598526000977,
+        "tunnel_ms": 151.35598182678223,
+        "total_ms": 360.8245849609375
+      }
+    },
+    {
+      "proxy": "74.119.147.209:4145",
+      "host": "74.119.147.209",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 335.1550102233887,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605387.3486943,
+      "timing": {
+        "connect_ms": 93.58620643615723,
+        "handshake_ms": 93.04189682006836,
+        "tunnel_ms": 148.46062660217285,
+        "total_ms": 335.1550102233887
+      }
+    },
+    {
+      "proxy": "5.255.113.177:1080",
+      "host": "5.255.113.177",
+      "port": 1080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 571.9449520111084,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605387.4346535,
+      "timing": {
+        "connect_ms": 154.37817573547363,
+        "handshake_ms": 153.79047393798828,
+        "tunnel_ms": 263.688325881958,
+        "total_ms": 571.9449520111084
+      }
+    },
+    {
+      "proxy": "217.76.39.4:1080",
+      "host": "217.76.39.4",
+      "port": 1080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 1022.0990180969238,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605387.615583,
+      "timing": {
+        "connect_ms": 190.9811496734619,
+        "handshake_ms": 190.90723991394043,
+        "tunnel_ms": 640.129804611206,
+        "total_ms": 1022.0990180969238
+      }
+    },
+    {
+      "proxy": "184.178.172.28:15294",
+      "host": "184.178.172.28",
+      "port": 15294,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 447.9103088378906,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605387.62993,
+      "timing": {
+        "connect_ms": 124.72677230834961,
+        "handshake_ms": 124.82666969299316,
+        "tunnel_ms": 198.29773902893066,
+        "total_ms": 447.9103088378906
+      }
+    },
+    {
+      "proxy": "198.8.84.3:4145",
+      "host": "198.8.84.3",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 150.65717697143555,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605387.7787292,
+      "timing": {
+        "connect_ms": 22.087574005126953,
+        "handshake_ms": 23.65589141845703,
+        "tunnel_ms": 104.8429012298584,
+        "total_ms": 150.65717697143555
+      }
+    },
+    {
+      "proxy": "107.181.161.81:4145",
+      "host": "107.181.161.81",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 142.55833625793457,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605388.192768,
+      "timing": {
+        "connect_ms": 22.257089614868164,
+        "handshake_ms": 21.62313461303711,
+        "tunnel_ms": 98.62589836120605,
+        "total_ms": 142.55833625793457
+      }
+    },
+    {
+      "proxy": "192.111.135.17:18302",
+      "host": "192.111.135.17",
+      "port": 18302,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 336.7440700531006,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605388.6377544,
+      "timing": {
+        "connect_ms": 95.3977108001709,
+        "handshake_ms": 95.57199478149414,
+        "tunnel_ms": 145.71833610534668,
+        "total_ms": 336.7440700531006
+      }
+    },
+    {
+      "proxy": "198.8.94.174:39078",
+      "host": "198.8.94.174",
+      "port": 39078,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 357.9714298248291,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605392.3627632,
+      "timing": {
+        "connect_ms": 101.61781311035156,
+        "handshake_ms": 95.10421752929688,
+        "tunnel_ms": 161.14282608032227,
+        "total_ms": 357.9714298248291
+      }
+    },
+    {
+      "proxy": "195.91.129.101:1337",
+      "host": "195.91.129.101",
+      "port": 1337,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 715.9557342529297,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605392.6064236,
+      "timing": {
+        "connect_ms": 198.1337070465088,
+        "handshake_ms": 197.99494743347168,
+        "tunnel_ms": 319.7333812713623,
+        "total_ms": 715.9557342529297
+      }
+    },
+    {
+      "proxy": "72.195.34.59:4145",
+      "host": "72.195.34.59",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 644.8941230773926,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605392.8509824,
+      "timing": {
+        "connect_ms": 168.80536079406738,
+        "handshake_ms": 176.09477043151855,
+        "tunnel_ms": 299.91650581359863,
+        "total_ms": 644.8941230773926
+      }
+    },
+    {
+      "proxy": "89.108.83.137:1080",
+      "host": "89.108.83.137",
+      "port": 1080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 694.4620609283447,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605392.8752003,
+      "timing": {
+        "connect_ms": 186.41209602355957,
+        "handshake_ms": 185.61816215515137,
+        "tunnel_ms": 322.3695755004883,
+        "total_ms": 694.4620609283447
+      }
+    },
+    {
+      "proxy": "192.111.130.2:4145",
+      "host": "192.111.130.2",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 338.4864330291748,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605393.2106795,
+      "timing": {
+        "connect_ms": 95.42298316955566,
+        "handshake_ms": 95.09754180908203,
+        "tunnel_ms": 147.91607856750488,
+        "total_ms": 338.4864330291748
+      }
+    },
+    {
+      "proxy": "107.175.232.156:7080",
+      "host": "107.175.232.156",
+      "port": 7080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 1150.2788066864014,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605393.3886895,
+      "timing": {
+        "connect_ms": 8.659601211547852,
+        "handshake_ms": 8.495092391967773,
+        "tunnel_ms": 1133.0320835113525,
+        "total_ms": 1150.2788066864014
+      }
+    },
+    {
+      "proxy": "142.54.231.38:4145",
+      "host": "142.54.231.38",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 139.73617553710938,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605393.460424,
+      "timing": {
+        "connect_ms": 23.034095764160156,
+        "handshake_ms": 22.777080535888672,
+        "tunnel_ms": 93.87660026550293,
+        "total_ms": 139.73617553710938
+      }
+    },
+    {
+      "proxy": "8.215.3.250:8081",
+      "host": "8.215.3.250",
+      "port": 8081,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 5378.195285797119,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605393.5491831,
+      "timing": {
+        "connect_ms": 186.49816513061523,
+        "handshake_ms": 2191.1299228668213,
+        "tunnel_ms": 3000.5054473876953,
+        "total_ms": 5378.195285797119
+      }
+    },
+    {
+      "proxy": "149.129.226.9:5441",
+      "host": "149.129.226.9",
+      "port": 5441,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 5370.96381187439,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605393.5758996,
+      "timing": {
+        "connect_ms": 184.82160568237305,
+        "handshake_ms": 2186.110496520996,
+        "tunnel_ms": 2999.969482421875,
+        "total_ms": 5370.96381187439
+      }
+    },
+    {
+      "proxy": "184.181.217.194:4145",
+      "host": "184.181.217.194",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 437.0608329772949,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605393.687796,
+      "timing": {
+        "connect_ms": 124.21369552612305,
+        "handshake_ms": 123.52776527404785,
+        "tunnel_ms": 189.1930103302002,
+        "total_ms": 437.0608329772949
+      }
+    },
+    {
+      "proxy": "72.37.216.68:4145",
+      "host": "72.37.216.68",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 146.96907997131348,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605393.6900647,
+      "timing": {
+        "connect_ms": 22.620677947998047,
+        "handshake_ms": 21.775245666503906,
+        "tunnel_ms": 102.5228500366211,
+        "total_ms": 146.96907997131348
+      }
+    },
+    {
+      "proxy": "104.200.152.30:4145",
+      "host": "104.200.152.30",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 138.45443725585938,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605393.7690318,
+      "timing": {
+        "connect_ms": 22.56035804748535,
+        "handshake_ms": 23.82040023803711,
+        "tunnel_ms": 92.01550483703613,
+        "total_ms": 138.45443725585938
+      }
+    },
+    {
+      "proxy": "68.71.254.6:4145",
+      "host": "68.71.254.6",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 149.85346794128418,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605393.7902129,
+      "timing": {
+        "connect_ms": 25.52342414855957,
+        "handshake_ms": 23.01168441772461,
+        "tunnel_ms": 101.2732982635498,
+        "total_ms": 149.85346794128418
+      }
+    },
+    {
+      "proxy": "8.211.49.86:9050",
+      "host": "8.211.49.86",
+      "port": 9050,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 5311.951398849487,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605393.971188,
+      "timing": {
+        "connect_ms": 155.90524673461914,
+        "handshake_ms": 2155.799388885498,
+        "tunnel_ms": 3000.128746032715,
+        "total_ms": 5311.951398849487
+      }
+    },
+    {
+      "proxy": "184.181.217.206:4145",
+      "host": "184.181.217.206",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 448.4388828277588,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605393.9944046,
+      "timing": {
+        "connect_ms": 128.31354141235352,
+        "handshake_ms": 125.62322616577148,
+        "tunnel_ms": 194.43297386169434,
+        "total_ms": 448.4388828277588
+      }
+    },
+    {
+      "proxy": "72.37.217.3:4145",
+      "host": "72.37.217.3",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 143.9526081085205,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605394.0722744,
+      "timing": {
+        "connect_ms": 22.09925651550293,
+        "handshake_ms": 22.167444229125977,
+        "tunnel_ms": 99.62844848632812,
+        "total_ms": 143.9526081085205
+      }
+    },
+    {
+      "proxy": "184.181.217.220:4145",
+      "host": "184.181.217.220",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 444.4096088409424,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605394.1248817,
+      "timing": {
+        "connect_ms": 124.77445602416992,
+        "handshake_ms": 124.62520599365234,
+        "tunnel_ms": 194.94175910949707,
+        "total_ms": 444.4096088409424
+      }
+    },
+    {
+      "proxy": "199.58.185.9:4145",
+      "host": "199.58.185.9",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 352.3752689361572,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605394.3462026,
+      "timing": {
+        "connect_ms": 95.80349922180176,
+        "handshake_ms": 98.77514839172363,
+        "tunnel_ms": 157.72771835327148,
+        "total_ms": 352.3752689361572
+      }
+    },
+    {
+      "proxy": "70.166.167.38:57728",
+      "host": "70.166.167.38",
+      "port": 57728,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 557.4414730072021,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605394.4769385,
+      "timing": {
+        "connect_ms": 124.61996078491211,
+        "handshake_ms": 125.79083442687988,
+        "tunnel_ms": 306.95605278015137,
+        "total_ms": 557.4414730072021
+      }
+    },
+    {
+      "proxy": "103.197.241.210:1080",
+      "host": "103.197.241.210",
+      "port": 1080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 4274.925708770752,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605394.6426718,
+      "timing": {
+        "connect_ms": 3294.6882247924805,
+        "handshake_ms": 205.3062915802002,
+        "tunnel_ms": 774.864673614502,
+        "total_ms": 4274.925708770752
+      }
+    },
+    {
+      "proxy": "103.189.218.83:6969",
+      "host": "103.189.218.83",
+      "port": 6969,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 4085.4272842407227,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605394.730674,
+      "timing": {
+        "connect_ms": 3287.6322269439697,
+        "handshake_ms": 219.29240226745605,
+        "tunnel_ms": 578.4296989440918,
+        "total_ms": 4085.4272842407227
+      }
+    },
+    {
+      "proxy": "199.116.114.11:4145",
+      "host": "199.116.114.11",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 134.82284545898438,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605395.034409,
+      "timing": {
+        "connect_ms": 22.072315216064453,
+        "handshake_ms": 22.0949649810791,
+        "tunnel_ms": 90.56997299194336,
+        "total_ms": 134.82284545898438
+      }
+    },
+    {
+      "proxy": "174.138.61.184:1080",
+      "host": "174.138.61.184",
+      "port": 1080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 243.1051731109619,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605395.4524639,
+      "timing": {
+        "connect_ms": 78.43661308288574,
+        "handshake_ms": 76.84659957885742,
+        "tunnel_ms": 87.75138854980469,
+        "total_ms": 243.1051731109619
+      }
+    },
+    {
+      "proxy": "98.178.72.21:10919",
+      "host": "98.178.72.21",
+      "port": 10919,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 458.1756591796875,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605396.402235,
+      "timing": {
+        "connect_ms": 128.53503227233887,
+        "handshake_ms": 133.12768936157227,
+        "tunnel_ms": 196.4285373687744,
+        "total_ms": 458.1756591796875
+      }
+    },
+    {
+      "proxy": "192.111.138.29:4145",
+      "host": "192.111.138.29",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 335.07323265075684,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605397.1733644,
+      "timing": {
+        "connect_ms": 94.17247772216797,
+        "handshake_ms": 93.40977668762207,
+        "tunnel_ms": 147.39656448364258,
+        "total_ms": 335.07323265075684
+      }
+    },
+    {
+      "proxy": "184.170.245.148:4145",
+      "host": "184.170.245.148",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 344.50507164001465,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605397.5589256,
+      "timing": {
+        "connect_ms": 95.87240219116211,
+        "handshake_ms": 97.77522087097168,
+        "tunnel_ms": 150.77662467956543,
+        "total_ms": 344.50507164001465
+      }
+    },
+    {
+      "proxy": "47.254.36.213:1080",
+      "host": "47.254.36.213",
+      "port": 1080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 5179.230451583862,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605397.7017293,
+      "timing": {
+        "connect_ms": 107.68365859985352,
+        "handshake_ms": 2068.7010288238525,
+        "tunnel_ms": 3002.739429473877,
+        "total_ms": 5179.230451583862
+      }
+    },
+    {
+      "proxy": "68.71.247.130:4145",
+      "host": "68.71.247.130",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 144.70601081848145,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605397.9034598,
+      "timing": {
+        "connect_ms": 21.835803985595703,
+        "handshake_ms": 22.876739501953125,
+        "tunnel_ms": 99.93720054626465,
+        "total_ms": 144.70601081848145
+      }
+    },
+    {
+      "proxy": "98.181.137.83:4145",
+      "host": "98.181.137.83",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 455.6901454925537,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605398.0427957,
+      "timing": {
+        "connect_ms": 125.97298622131348,
+        "handshake_ms": 130.17868995666504,
+        "tunnel_ms": 199.46551322937012,
+        "total_ms": 455.6901454925537
+      }
+    },
+    {
+      "proxy": "47.79.40.185:12462",
+      "host": "47.79.40.185",
+      "port": 12462,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 646.5206146240234,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605398.056781,
+      "timing": {
+        "connect_ms": 105.96728324890137,
+        "handshake_ms": 434.91554260253906,
+        "tunnel_ms": 105.5748462677002,
+        "total_ms": 646.5206146240234
+      }
+    },
+    {
+      "proxy": "104.200.135.46:4145",
+      "host": "104.200.135.46",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 152.87184715270996,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605398.4318032,
+      "timing": {
+        "connect_ms": 22.34673500061035,
+        "handshake_ms": 22.603511810302734,
+        "tunnel_ms": 107.87439346313477,
+        "total_ms": 152.87184715270996
+      }
+    },
+    {
+      "proxy": "107.152.98.5:4145",
+      "host": "107.152.98.5",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 140.52915573120117,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605398.8161304,
+      "timing": {
+        "connect_ms": 22.20916748046875,
+        "handshake_ms": 21.68869972229004,
+        "tunnel_ms": 96.55499458312988,
+        "total_ms": 140.52915573120117
+      }
+    },
+    {
+      "proxy": "174.77.111.197:4145",
+      "host": "174.77.111.197",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 447.04651832580566,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605398.9176257,
+      "timing": {
+        "connect_ms": 126.22356414794922,
+        "handshake_ms": 125.40912628173828,
+        "tunnel_ms": 195.359468460083,
+        "total_ms": 447.04651832580566
+      }
+    },
+    {
+      "proxy": "74.119.144.60:4145",
+      "host": "74.119.144.60",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 350.37803649902344,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605399.287363,
+      "timing": {
+        "connect_ms": 94.7885513305664,
+        "handshake_ms": 94.86532211303711,
+        "tunnel_ms": 160.61806678771973,
+        "total_ms": 350.37803649902344
+      }
+    },
+    {
+      "proxy": "199.229.254.129:4145",
+      "host": "199.229.254.129",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 358.0813407897949,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605399.3501809,
+      "timing": {
+        "connect_ms": 97.49269485473633,
+        "handshake_ms": 96.90618515014648,
+        "tunnel_ms": 163.60902786254883,
+        "total_ms": 358.0813407897949
+      }
+    },
+    {
+      "proxy": "194.163.167.32:1080",
+      "host": "194.163.167.32",
+      "port": 1080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 3552.57248878479,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605399.364692,
+      "timing": {
+        "connect_ms": 413.44714164733887,
+        "handshake_ms": 608.0071926116943,
+        "tunnel_ms": 2531.0239791870117,
+        "total_ms": 3552.57248878479
+      }
+    },
+    {
+      "proxy": "174.77.111.196:4145",
+      "host": "174.77.111.196",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 508.5904598236084,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605399.7782094,
+      "timing": {
+        "connect_ms": 119.24386024475098,
+        "handshake_ms": 119.99726295471191,
+        "tunnel_ms": 269.2699432373047,
+        "total_ms": 508.5904598236084
+      }
+    },
+    {
+      "proxy": "89.46.249.252:8765",
+      "host": "89.46.249.252",
+      "port": 8765,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 2719.536066055298,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605400.7392492,
+      "timing": {
+        "connect_ms": 1173.0220317840576,
+        "handshake_ms": 1302.3767471313477,
+        "tunnel_ms": 244.06194686889648,
+        "total_ms": 2719.536066055298
+      }
+    },
+    {
+      "proxy": "103.191.218.119:8199",
+      "host": "103.191.218.119",
+      "port": 8199,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 882.6756477355957,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605401.4802566,
+      "timing": {
+        "connect_ms": 191.1773681640625,
+        "handshake_ms": 190.86790084838867,
+        "tunnel_ms": 500.50950050354004,
+        "total_ms": 882.6756477355957
+      }
+    },
+    {
+      "proxy": "142.54.239.1:4145",
+      "host": "142.54.239.1",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 138.33165168762207,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605401.747185,
+      "timing": {
+        "connect_ms": 22.397756576538086,
+        "handshake_ms": 23.222684860229492,
+        "tunnel_ms": 92.60249137878418,
+        "total_ms": 138.33165168762207
+      }
+    },
+    {
+      "proxy": "72.195.114.169:4145",
+      "host": "72.195.114.169",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 441.1604404449463,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605403.1312094,
+      "timing": {
+        "connect_ms": 126.17897987365723,
+        "handshake_ms": 124.10712242126465,
+        "tunnel_ms": 190.79327583312988,
+        "total_ms": 441.1604404449463
+      }
+    },
+    {
+      "proxy": "68.1.210.163:4145",
+      "host": "68.1.210.163",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 470.10040283203125,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605403.7228065,
+      "timing": {
+        "connect_ms": 123.96001815795898,
+        "handshake_ms": 124.7854232788086,
+        "tunnel_ms": 221.30203247070312,
+        "total_ms": 470.10040283203125
+      }
+    },
+    {
+      "proxy": "162.253.68.97:4145",
+      "host": "162.253.68.97",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 145.27034759521484,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605404.044127,
+      "timing": {
+        "connect_ms": 22.179126739501953,
+        "handshake_ms": 23.955821990966797,
+        "tunnel_ms": 99.08890724182129,
+        "total_ms": 145.27034759521484
+      }
+    },
+    {
+      "proxy": "70.166.167.55:57745",
+      "host": "70.166.167.55",
+      "port": 57745,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 454.176664352417,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605404.1837792,
+      "timing": {
+        "connect_ms": 131.39057159423828,
+        "handshake_ms": 125.63586235046387,
+        "tunnel_ms": 197.09014892578125,
+        "total_ms": 454.176664352417
+      }
+    },
+    {
+      "proxy": "186.26.95.249:61445",
+      "host": "186.26.95.249",
+      "port": 61445,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 10300.694227218628,
+      "error": "Connection timeout",
+      "error_category": "TIMEOUT_CONNECT",
+      "error_stage": "connect",
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605404.3408132,
+      "timing": {
+        "connect_ms": 4278.857946395874,
+        "handshake_ms": 192.99650192260742,
+        "tunnel_ms": 328.2616138458252,
+        "total_ms": 10300.694227218628
+      }
+    },
+    {
+      "proxy": "192.111.137.35:4145",
+      "host": "192.111.137.35",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 349.0781784057617,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605404.7415054,
+      "timing": {
+        "connect_ms": 97.53274917602539,
+        "handshake_ms": 102.94365882873535,
+        "tunnel_ms": 148.53668212890625,
+        "total_ms": 349.0781784057617
+      }
+    },
+    {
+      "proxy": "174.64.199.79:4145",
+      "host": "174.64.199.79",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 437.55030632019043,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605404.7921968,
+      "timing": {
+        "connect_ms": 124.1309642791748,
+        "handshake_ms": 120.85962295532227,
+        "tunnel_ms": 192.47126579284668,
+        "total_ms": 437.55030632019043
+      }
+    },
+    {
+      "proxy": "184.178.172.18:15280",
+      "host": "184.178.172.18",
+      "port": 15280,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 542.9506301879883,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605405.1642568,
+      "timing": {
+        "connect_ms": 139.13774490356445,
+        "handshake_ms": 125.25129318237305,
+        "tunnel_ms": 278.49292755126953,
+        "total_ms": 542.9506301879883
+      }
+    },
+    {
+      "proxy": "31.43.194.184:1080",
+      "host": "31.43.194.184",
+      "port": 1080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 1018.5108184814453,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605405.482862,
+      "timing": {
+        "connect_ms": 225.80599784851074,
+        "handshake_ms": 343.68324279785156,
+        "tunnel_ms": 448.9305019378662,
+        "total_ms": 1018.5108184814453
+      }
+    },
+    {
+      "proxy": "192.252.208.67:14287",
+      "host": "192.252.208.67",
+      "port": 14287,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 334.94043350219727,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605407.2108982,
+      "timing": {
+        "connect_ms": 93.42646598815918,
+        "handshake_ms": 94.04897689819336,
+        "tunnel_ms": 147.40276336669922,
+        "total_ms": 334.94043350219727
+      }
+    },
+    {
+      "proxy": "47.91.115.179:8081",
+      "host": "47.91.115.179",
+      "port": 8081,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 5482.3925495147705,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605407.5458643,
+      "timing": {
+        "connect_ms": 240.95892906188965,
+        "handshake_ms": 2240.964651107788,
+        "tunnel_ms": 3000.3979206085205,
+        "total_ms": 5482.3925495147705
+      }
+    },
+    {
+      "proxy": "64.227.131.240:1080",
+      "host": "64.227.131.240",
+      "port": 1080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 2333.5392475128174,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605407.7126918,
+      "timing": {
+        "connect_ms": 258.67223739624023,
+        "handshake_ms": 301.18751525878906,
+        "tunnel_ms": 1773.6294269561768,
+        "total_ms": 2333.5392475128174
+      }
+    },
+    {
+      "proxy": "218.245.5.12:7890",
+      "host": "218.245.5.12",
+      "port": 7890,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 6235.5499267578125,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605408.2688313,
+      "timing": {
+        "connect_ms": 3299.9424934387207,
+        "handshake_ms": 2731.4934730529785,
+        "tunnel_ms": 204.04839515686035,
+        "total_ms": 6235.5499267578125
+      }
+    },
+    {
+      "proxy": "15.168.235.57:12185",
+      "host": "15.168.235.57",
+      "port": 12185,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 427.9897212982178,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605408.4470608,
+      "timing": {
+        "connect_ms": 112.56647109985352,
+        "handshake_ms": 179.17633056640625,
+        "tunnel_ms": 136.17658615112305,
+        "total_ms": 427.9897212982178
+      }
+    },
+    {
+      "proxy": "142.54.226.214:4145",
+      "host": "142.54.226.214",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 135.61034202575684,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605408.566988,
+      "timing": {
+        "connect_ms": 22.237300872802734,
+        "handshake_ms": 22.226572036743164,
+        "tunnel_ms": 91.09830856323242,
+        "total_ms": 135.61034202575684
+      }
+    },
+    {
+      "proxy": "107.181.168.145:4145",
+      "host": "107.181.168.145",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 158.64276885986328,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605408.6935682,
+      "timing": {
+        "connect_ms": 25.2230167388916,
+        "handshake_ms": 24.72662925720215,
+        "tunnel_ms": 108.63733291625977,
+        "total_ms": 158.64276885986328
+      }
+    },
+    {
+      "proxy": "174.77.111.198:49547",
+      "host": "174.77.111.198",
+      "port": 49547,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 716.6469097137451,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605408.8043072,
+      "timing": {
+        "connect_ms": 213.63568305969238,
+        "handshake_ms": 213.5152816772461,
+        "tunnel_ms": 289.4303798675537,
+        "total_ms": 716.6469097137451
+      }
+    },
+    {
+      "proxy": "68.1.210.189:4145",
+      "host": "68.1.210.189",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 457.7136039733887,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605408.8748243,
+      "timing": {
+        "connect_ms": 126.05071067810059,
+        "handshake_ms": 129.12440299987793,
+        "tunnel_ms": 202.4862766265869,
+        "total_ms": 457.7136039733887
+      }
+    },
+    {
+      "proxy": "184.178.172.5:15303",
+      "host": "184.178.172.5",
+      "port": 15303,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 433.8531494140625,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605408.9951096,
+      "timing": {
+        "connect_ms": 119.76432800292969,
+        "handshake_ms": 121.68192863464355,
+        "tunnel_ms": 192.3515796661377,
+        "total_ms": 433.8531494140625
+      }
+    },
+    {
+      "proxy": "31.59.185.74:2525",
+      "host": "31.59.185.74",
+      "port": 2525,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 3678.262710571289,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605409.4598475,
+      "timing": {
+        "connect_ms": 1236.0296249389648,
+        "handshake_ms": 274.1053104400635,
+        "tunnel_ms": 2168.0452823638916,
+        "total_ms": 3678.262710571289
+      }
+    },
+    {
+      "proxy": "188.235.139.93:1080",
+      "host": "188.235.139.93",
+      "port": 1080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 1444.2739486694336,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605410.0462914,
+      "timing": {
+        "connect_ms": 207.37934112548828,
+        "handshake_ms": 828.6962509155273,
+        "tunnel_ms": 408.1265926361084,
+        "total_ms": 1444.2739486694336
+      }
+    },
+    {
+      "proxy": "174.64.199.82:4145",
+      "host": "174.64.199.82",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 710.7386589050293,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605410.0475307,
+      "timing": {
+        "connect_ms": 213.0451202392578,
+        "handshake_ms": 208.79220962524414,
+        "tunnel_ms": 288.8154983520508,
+        "total_ms": 710.7386589050293
+      }
+    },
+    {
+      "proxy": "8.215.3.250:9080",
+      "host": "8.215.3.250",
+      "port": 9080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 5375.173091888428,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605410.539679,
+      "timing": {
+        "connect_ms": 185.87422370910645,
+        "handshake_ms": 2185.698986053467,
+        "tunnel_ms": 3003.537654876709,
+        "total_ms": 5375.173091888428
+      }
+    },
+    {
+      "proxy": "83.220.169.199:1080",
+      "host": "83.220.169.199",
+      "port": 1080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 1965.240478515625,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605410.7582958,
+      "timing": {
+        "connect_ms": 1231.6744327545166,
+        "handshake_ms": 252.61902809143066,
+        "tunnel_ms": 480.85927963256836,
+        "total_ms": 1965.240478515625
+      }
+    },
+    {
+      "proxy": "199.58.184.97:4145",
+      "host": "199.58.184.97",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 358.6115837097168,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605411.490035,
+      "timing": {
+        "connect_ms": 95.91507911682129,
+        "handshake_ms": 114.12596702575684,
+        "tunnel_ms": 148.47898483276367,
+        "total_ms": 358.6115837097168
+      }
+    },
+    {
+      "proxy": "62.60.131.180:4090",
+      "host": "62.60.131.180",
+      "port": 4090,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 1545.6569194793701,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605412.1239247,
+      "timing": {
+        "connect_ms": 155.03692626953125,
+        "handshake_ms": 1025.447130203247,
+        "tunnel_ms": 365.1130199432373,
+        "total_ms": 1545.6569194793701
+      }
+    },
+    {
+      "proxy": "149.129.255.179:119",
+      "host": "149.129.255.179",
+      "port": 119,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 5374.305486679077,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605412.7235723,
+      "timing": {
+        "connect_ms": 186.27643585205078,
+        "handshake_ms": 2186.9266033172607,
+        "tunnel_ms": 3001.01900100708,
+        "total_ms": 5374.305486679077
+      }
+    },
+    {
+      "proxy": "142.54.235.9:4145",
+      "host": "142.54.235.9",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 140.10262489318848,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605413.2553325,
+      "timing": {
+        "connect_ms": 22.00794219970703,
+        "handshake_ms": 22.647380828857422,
+        "tunnel_ms": 95.39294242858887,
+        "total_ms": 140.10262489318848
+      }
+    },
+    {
+      "proxy": "192.252.220.92:17328",
+      "host": "192.252.220.92",
+      "port": 17328,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 138.50116729736328,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605413.3378465,
+      "timing": {
+        "connect_ms": 24.068593978881836,
+        "handshake_ms": 21.976947784423828,
+        "tunnel_ms": 92.37861633300781,
+        "total_ms": 138.50116729736328
+      }
+    },
+    {
+      "proxy": "202.62.62.113:1080",
+      "host": "202.62.62.113",
+      "port": 1080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 2991.3926124572754,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605413.4763722,
+      "timing": {
+        "connect_ms": 2252.8562545776367,
+        "handshake_ms": 204.75482940673828,
+        "tunnel_ms": 533.693790435791,
+        "total_ms": 2991.3926124572754
+      }
+    },
+    {
+      "proxy": "203.189.150.93:1080",
+      "host": "203.189.150.93",
+      "port": 1080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 4958.802700042725,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605414.0068455,
+      "timing": {
+        "connect_ms": 4279.886245727539,
+        "handshake_ms": 204.2694091796875,
+        "tunnel_ms": 474.57003593444824,
+        "total_ms": 4958.802700042725
+      }
+    },
+    {
+      "proxy": "34.216.224.9:40715",
+      "host": "34.216.224.9",
+      "port": 40715,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 74.52058792114258,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605414.808307,
+      "timing": {
+        "connect_ms": 22.23825454711914,
+        "handshake_ms": 29.21438217163086,
+        "tunnel_ms": 22.999286651611328,
+        "total_ms": 74.52058792114258
+      }
+    },
+    {
+      "proxy": "184.178.172.26:4145",
+      "host": "184.178.172.26",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 448.58241081237793,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605414.8418198,
+      "timing": {
+        "connect_ms": 125.16498565673828,
+        "handshake_ms": 124.27473068237305,
+        "tunnel_ms": 199.0952491760254,
+        "total_ms": 448.58241081237793
+      }
+    },
+    {
+      "proxy": "192.111.139.165:4145",
+      "host": "192.111.139.165",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 341.81761741638184,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605414.8828566,
+      "timing": {
+        "connect_ms": 96.08173370361328,
+        "handshake_ms": 96.2378978729248,
+        "tunnel_ms": 149.42646026611328,
+        "total_ms": 341.81761741638184
+      }
+    },
+    {
+      "proxy": "202.62.62.51:1080",
+      "host": "202.62.62.51",
+      "port": 1080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 1895.3220844268799,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605414.8981817,
+      "timing": {
+        "connect_ms": 1213.1695747375488,
+        "handshake_ms": 203.92322540283203,
+        "tunnel_ms": 478.15394401550293,
+        "total_ms": 1895.3220844268799
+      }
+    },
+    {
+      "proxy": "192.111.137.37:18762",
+      "host": "192.111.137.37",
+      "port": 18762,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 341.8095111846924,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605414.9428213,
+      "timing": {
+        "connect_ms": 95.0932502746582,
+        "handshake_ms": 96.12083435058594,
+        "tunnel_ms": 150.53725242614746,
+        "total_ms": 341.8095111846924
+      }
+    },
+    {
+      "proxy": "184.178.172.23:4145",
+      "host": "184.178.172.23",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 470.4608917236328,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605415.14937,
+      "timing": {
+        "connect_ms": 131.9441795349121,
+        "handshake_ms": 135.29562950134277,
+        "tunnel_ms": 203.15170288085938,
+        "total_ms": 470.4608917236328
+      }
+    },
+    {
+      "proxy": "8.215.15.163:3128",
+      "host": "8.215.15.163",
+      "port": 3128,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 5376.229047775269,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605415.2247274,
+      "timing": {
+        "connect_ms": 186.24210357666016,
+        "handshake_ms": 2186.5594387054443,
+        "tunnel_ms": 3003.368377685547,
+        "total_ms": 5376.229047775269
+      }
+    },
+    {
+      "proxy": "94.233.120.194:1080",
+      "host": "94.233.120.194",
+      "port": 1080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 1983.3815097808838,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605415.547125,
+      "timing": {
+        "connect_ms": 1220.9501266479492,
+        "handshake_ms": 400.3863334655762,
+        "tunnel_ms": 361.957311630249,
+        "total_ms": 1983.3815097808838
+      }
+    },
+    {
+      "proxy": "68.71.249.153:48606",
+      "host": "68.71.249.153",
+      "port": 48606,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 148.66042137145996,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605415.704082,
+      "timing": {
+        "connect_ms": 23.539066314697266,
+        "handshake_ms": 21.813631057739258,
+        "tunnel_ms": 103.20854187011719,
+        "total_ms": 148.66042137145996
+      }
+    },
+    {
+      "proxy": "166.62.121.102:45886",
+      "host": "166.62.121.102",
+      "port": 45886,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 191.39862060546875,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605416.6397204,
+      "timing": {
+        "connect_ms": 44.23952102661133,
+        "handshake_ms": 44.219970703125,
+        "tunnel_ms": 102.8909683227539,
+        "total_ms": 191.39862060546875
+      }
+    },
+    {
+      "proxy": "192.111.135.18:18301",
+      "host": "192.111.135.18",
+      "port": 18301,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 368.61634254455566,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605416.8311372,
+      "timing": {
+        "connect_ms": 95.46470642089844,
+        "handshake_ms": 111.33837699890137,
+        "tunnel_ms": 161.73768043518066,
+        "total_ms": 368.61634254455566
+      }
+    },
+    {
+      "proxy": "8.215.3.250:41",
+      "host": "8.215.3.250",
+      "port": 41,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 6926.300287246704,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605416.9367495,
+      "timing": {
+        "connect_ms": 187.3009204864502,
+        "handshake_ms": 3737.9097938537598,
+        "tunnel_ms": 3000.9799003601074,
+        "total_ms": 6926.300287246704
+      }
+    },
+    {
+      "proxy": "38.54.9.151:3128",
+      "host": "38.54.9.151",
+      "port": 3128,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 5523.897171020508,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605417.5305364,
+      "timing": {
+        "connect_ms": 260.481595993042,
+        "handshake_ms": 2262.4576091766357,
+        "tunnel_ms": 3000.859498977661,
+        "total_ms": 5523.897171020508
+      }
+    },
+    {
+      "proxy": "184.178.172.11:4145",
+      "host": "184.178.172.11",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 544.3515777587891,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605417.845997,
+      "timing": {
+        "connect_ms": 129.95219230651855,
+        "handshake_ms": 134.6445083618164,
+        "tunnel_ms": 279.6642780303955,
+        "total_ms": 544.3515777587891
+      }
+    },
+    {
+      "proxy": "138.68.60.8:1080",
+      "host": "138.68.60.8",
+      "port": 1080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 574.9523639678955,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605418.1023035,
+      "timing": {
+        "connect_ms": 1.9917488098144531,
+        "handshake_ms": 547.7850437164307,
+        "tunnel_ms": 25.12192726135254,
+        "total_ms": 574.9523639678955
+      }
+    },
+    {
+      "proxy": "199.116.112.6:4145",
+      "host": "199.116.112.6",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 359.3924045562744,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605418.3903794,
+      "timing": {
+        "connect_ms": 93.81747245788574,
+        "handshake_ms": 93.35017204284668,
+        "tunnel_ms": 172.17040061950684,
+        "total_ms": 359.3924045562744
+      }
+    },
+    {
+      "proxy": "206.220.175.2:4145",
+      "host": "206.220.175.2",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 140.82980155944824,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605418.9656706,
+      "timing": {
+        "connect_ms": 23.190736770629883,
+        "handshake_ms": 23.938655853271484,
+        "tunnel_ms": 93.62316131591797,
+        "total_ms": 140.82980155944824
+      }
+    },
+    {
+      "proxy": "192.252.216.81:4145",
+      "host": "192.252.216.81",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 348.560094833374,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605419.9315894,
+      "timing": {
+        "connect_ms": 95.61824798583984,
+        "handshake_ms": 99.93195533752441,
+        "tunnel_ms": 152.94313430786133,
+        "total_ms": 348.560094833374
+      }
+    },
+    {
+      "proxy": "142.54.229.249:4145",
+      "host": "142.54.229.249",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 143.62144470214844,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605419.9615307,
+      "timing": {
+        "connect_ms": 22.620677947998047,
+        "handshake_ms": 23.462295532226562,
+        "tunnel_ms": 97.46241569519043,
+        "total_ms": 143.62144470214844
+      }
+    },
+    {
+      "proxy": "208.102.51.6:58208",
+      "host": "208.102.51.6",
+      "port": 58208,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 4030.538320541382,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605420.023243,
+      "timing": {
+        "connect_ms": 773.8742828369141,
+        "handshake_ms": 739.9711608886719,
+        "tunnel_ms": 2516.6163444519043,
+        "total_ms": 4030.538320541382
+      }
+    },
+    {
+      "proxy": "192.241.156.17:1080",
+      "host": "192.241.156.17",
+      "port": 1080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 329.86927032470703,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605420.5041456,
+      "timing": {
+        "connect_ms": 80.01184463500977,
+        "handshake_ms": 82.05580711364746,
+        "tunnel_ms": 167.74725914001465,
+        "total_ms": 329.86927032470703
+      }
+    },
+    {
+      "proxy": "193.233.254.9:1080",
+      "host": "193.233.254.9",
+      "port": 1080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 779.8590660095215,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605420.8124726,
+      "timing": {
+        "connect_ms": 176.41425132751465,
+        "handshake_ms": 278.93853187561035,
+        "tunnel_ms": 324.4354724884033,
+        "total_ms": 779.8590660095215
+      }
+    },
+    {
+      "proxy": "47.250.11.111:9098",
+      "host": "47.250.11.111",
+      "port": 9098,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 5405.5516719818115,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605421.259895,
+      "timing": {
+        "connect_ms": 202.84652709960938,
+        "handshake_ms": 2201.8585205078125,
+        "tunnel_ms": 3000.7736682891846,
+        "total_ms": 5405.5516719818115
+      }
+    },
+    {
+      "proxy": "149.129.226.9:41",
+      "host": "149.129.226.9",
+      "port": 41,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 5369.858026504517,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605421.4117253,
+      "timing": {
+        "connect_ms": 184.62586402893066,
+        "handshake_ms": 2185.0106716156006,
+        "tunnel_ms": 3000.1537799835205,
+        "total_ms": 5369.858026504517
+      }
+    },
+    {
+      "proxy": "212.237.125.216:6969",
+      "host": "212.237.125.216",
+      "port": 6969,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 6524.400949478149,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605421.7765899,
+      "timing": {
+        "connect_ms": 4326.358795166016,
+        "handshake_ms": 1472.9406833648682,
+        "tunnel_ms": 725.0287532806396,
+        "total_ms": 6524.400949478149
+      }
+    },
+    {
+      "proxy": "202.62.42.167:1080",
+      "host": "202.62.42.167",
+      "port": 1080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 923.6412048339844,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605422.9012303,
+      "timing": {
+        "connect_ms": 200.8645534515381,
+        "handshake_ms": 215.0893211364746,
+        "tunnel_ms": 507.5974464416504,
+        "total_ms": 923.6412048339844
+      }
+    },
+    {
+      "proxy": "8.212.151.166:1080",
+      "host": "8.212.151.166",
+      "port": 1080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 5387.490272521973,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605423.4260497,
+      "timing": {
+        "connect_ms": 189.24212455749512,
+        "handshake_ms": 2197.8132724761963,
+        "tunnel_ms": 3000.345230102539,
+        "total_ms": 5387.490272521973
+      }
+    },
+    {
+      "proxy": "124.248.164.61:1080",
+      "host": "124.248.164.61",
+      "port": 1080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 2701.3158798217773,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605423.6146324,
+      "timing": {
+        "connect_ms": 2288.2637977600098,
+        "handshake_ms": 202.89921760559082,
+        "tunnel_ms": 210.07490158081055,
+        "total_ms": 2701.3158798217773
+      }
+    },
+    {
+      "proxy": "8.211.195.173:55555",
+      "host": "8.211.195.173",
+      "port": 55555,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 5557.594299316406,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605423.6584237,
+      "timing": {
+        "connect_ms": 296.0090637207031,
+        "handshake_ms": 2261.3608837127686,
+        "tunnel_ms": 3000.1492500305176,
+        "total_ms": 5557.594299316406
+      }
+    },
+    {
+      "proxy": "184.181.217.210:4145",
+      "host": "184.181.217.210",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 1445.5385208129883,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605423.6679268,
+      "timing": {
+        "connect_ms": 220.09706497192383,
+        "handshake_ms": 932.8818321228027,
+        "tunnel_ms": 292.4935817718506,
+        "total_ms": 1445.5385208129883
+      }
+    },
+    {
+      "proxy": "184.178.172.25:15291",
+      "host": "184.178.172.25",
+      "port": 15291,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 439.03636932373047,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605424.2720072,
+      "timing": {
+        "connect_ms": 123.16441535949707,
+        "handshake_ms": 126.2807846069336,
+        "tunnel_ms": 189.51678276062012,
+        "total_ms": 439.03636932373047
+      }
+    },
+    {
+      "proxy": "98.188.47.150:4145",
+      "host": "98.188.47.150",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 633.7275505065918,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605424.5573676,
+      "timing": {
+        "connect_ms": 127.55393981933594,
+        "handshake_ms": 125.31852722167969,
+        "tunnel_ms": 380.80644607543945,
+        "total_ms": 633.7275505065918
+      }
+    },
+    {
+      "proxy": "192.111.134.10:4145",
+      "host": "192.111.134.10",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 136.77477836608887,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605424.7758818,
+      "timing": {
+        "connect_ms": 22.639989852905273,
+        "handshake_ms": 22.068023681640625,
+        "tunnel_ms": 91.96901321411133,
+        "total_ms": 136.77477836608887
+      }
+    },
+    {
+      "proxy": "91.107.138.98:2255",
+      "host": "91.107.138.98",
+      "port": 2255,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 476.1054515838623,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605425.164034,
+      "timing": {
+        "connect_ms": 158.05363655090332,
+        "handshake_ms": 159.93237495422363,
+        "tunnel_ms": 158.0486297607422,
+        "total_ms": 476.1054515838623
+      }
+    },
+    {
+      "proxy": "199.102.105.242:4145",
+      "host": "199.102.105.242",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 151.0934829711914,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605425.1911159,
+      "timing": {
+        "connect_ms": 24.878501892089844,
+        "handshake_ms": 23.57935905456543,
+        "tunnel_ms": 102.57434844970703,
+        "total_ms": 151.0934829711914
+      }
+    },
+    {
+      "proxy": "85.175.219.236:1080",
+      "host": "85.175.219.236",
+      "port": 1080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 1645.8017826080322,
+      "error": "Connection refused",
+      "error_category": "CONNECTION_REFUSED",
+      "error_stage": "connect",
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605426.0576062,
+      "timing": {
+        "connect_ms": 238.9523983001709,
+        "handshake_ms": 292.34766960144043,
+        "tunnel_ms": 382.1735382080078,
+        "total_ms": 1645.8017826080322
+      }
+    },
+    {
+      "proxy": "8.215.12.103:8448",
+      "host": "8.215.12.103",
+      "port": 8448,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 5373.477220535278,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605426.5403266,
+      "timing": {
+        "connect_ms": 186.30146980285645,
+        "handshake_ms": 2186.2471103668213,
+        "tunnel_ms": 3000.8630752563477,
+        "total_ms": 5373.477220535278
+      }
+    },
+    {
+      "proxy": "67.201.33.10:25283",
+      "host": "67.201.33.10",
+      "port": 25283,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 166.70656204223633,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605427.282022,
+      "timing": {
+        "connect_ms": 27.948379516601562,
+        "handshake_ms": 32.67192840576172,
+        "tunnel_ms": 105.99374771118164,
+        "total_ms": 166.70656204223633
+      }
+    },
+    {
+      "proxy": "47.250.51.110:8081",
+      "host": "47.250.51.110",
+      "port": 8081,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 5394.792318344116,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605429.1240919,
+      "timing": {
+        "connect_ms": 196.7318058013916,
+        "handshake_ms": 2197.298049926758,
+        "tunnel_ms": 3000.678777694702,
+        "total_ms": 5394.792318344116
+      }
+    },
+    {
+      "proxy": "98.170.57.231:4145",
+      "host": "98.170.57.231",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 696.596622467041,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605430.402937,
+      "timing": {
+        "connect_ms": 214.34497833251953,
+        "handshake_ms": 208.68253707885742,
+        "tunnel_ms": 273.49019050598145,
+        "total_ms": 696.596622467041
+      }
+    },
+    {
+      "proxy": "184.181.217.201:4145",
+      "host": "184.181.217.201",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 454.87093925476074,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605430.5713816,
+      "timing": {
+        "connect_ms": 133.48031044006348,
+        "handshake_ms": 125.06818771362305,
+        "tunnel_ms": 196.25377655029297,
+        "total_ms": 454.87093925476074
+      }
+    },
+    {
+      "proxy": "184.181.217.213:4145",
+      "host": "184.181.217.213",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 448.5766887664795,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605430.6069403,
+      "timing": {
+        "connect_ms": 125.94461441040039,
+        "handshake_ms": 123.84963035583496,
+        "tunnel_ms": 198.71282577514648,
+        "total_ms": 448.5766887664795
+      }
+    },
+    {
+      "proxy": "110.235.247.47:1080",
+      "host": "110.235.247.47",
+      "port": 1080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 7445.120811462402,
+      "error": "Connection timeout",
+      "error_category": "TIMEOUT_CONNECT",
+      "error_stage": "connect",
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605430.782509,
+      "timing": {
+        "connect_ms": 1205.6167125701904,
+        "handshake_ms": 207.97038078308105,
+        "tunnel_ms": 528.9435386657715,
+        "total_ms": 7445.120811462402
+      }
+    },
+    {
+      "proxy": "192.252.215.5:16137",
+      "host": "192.252.215.5",
+      "port": 16137,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 335.9823226928711,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605431.0568454,
+      "timing": {
+        "connect_ms": 95.40271759033203,
+        "handshake_ms": 94.81525421142578,
+        "tunnel_ms": 145.7071304321289,
+        "total_ms": 335.9823226928711
+      }
+    },
+    {
+      "proxy": "94.74.91.27:1081",
+      "host": "94.74.91.27",
+      "port": 1081,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 4828.884840011597,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605431.2249444,
+      "timing": {
+        "connect_ms": 1178.131103515625,
+        "handshake_ms": 172.2862720489502,
+        "tunnel_ms": 3478.4085750579834,
+        "total_ms": 4828.884840011597
+      }
+    },
+    {
+      "proxy": "98.170.57.249:4145",
+      "host": "98.170.57.249",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 544.8827743530273,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605431.3907974,
+      "timing": {
+        "connect_ms": 125.71406364440918,
+        "handshake_ms": 127.75707244873047,
+        "tunnel_ms": 291.3644313812256,
+        "total_ms": 544.8827743530273
+      }
+    },
+    {
+      "proxy": "66.42.224.229:41679",
+      "host": "66.42.224.229",
+      "port": 41679,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 2785.738706588745,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605432.7727199,
+      "timing": {
+        "connect_ms": 719.0780639648438,
+        "handshake_ms": 691.6487216949463,
+        "tunnel_ms": 1374.9463558197021,
+        "total_ms": 2785.738706588745
+      }
+    },
+    {
+      "proxy": "184.170.249.65:4145",
+      "host": "184.170.249.65",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 357.388973236084,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605434.1769052,
+      "timing": {
+        "connect_ms": 100.66485404968262,
+        "handshake_ms": 100.97026824951172,
+        "tunnel_ms": 155.70354461669922,
+        "total_ms": 357.388973236084
+      }
+    },
+    {
+      "proxy": "142.54.232.6:4145",
+      "host": "142.54.232.6",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 153.98073196411133,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605434.5213053,
+      "timing": {
+        "connect_ms": 22.5222110748291,
+        "handshake_ms": 22.424936294555664,
+        "tunnel_ms": 108.96444320678711,
+        "total_ms": 153.98073196411133
+      }
+    },
+    {
+      "proxy": "8.215.15.163:6379",
+      "host": "8.215.15.163",
+      "port": 6379,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 5372.905492782593,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605434.5560894,
+      "timing": {
+        "connect_ms": 186.39612197875977,
+        "handshake_ms": 2186.1770153045654,
+        "tunnel_ms": 3000.2756118774414,
+        "total_ms": 5372.905492782593
+      }
+    },
+    {
+      "proxy": "94.230.127.180:1080",
+      "host": "94.230.127.180",
+      "port": 1080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 846.3313579559326,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605435.360965,
+      "timing": {
+        "connect_ms": 222.52607345581055,
+        "handshake_ms": 222.36061096191406,
+        "tunnel_ms": 401.37791633605957,
+        "total_ms": 846.3313579559326
+      }
+    },
+    {
+      "proxy": "192.252.209.155:14455",
+      "host": "192.252.209.155",
+      "port": 14455,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 344.836950302124,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605435.5092375,
+      "timing": {
+        "connect_ms": 95.16620635986328,
+        "handshake_ms": 95.07465362548828,
+        "tunnel_ms": 154.51788902282715,
+        "total_ms": 344.836950302124
+      }
+    },
+    {
+      "proxy": "104.248.197.67:1080",
+      "host": "104.248.197.67",
+      "port": 1080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 1480.4151058197021,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605435.59183,
+      "timing": {
+        "connect_ms": 154.0377140045166,
+        "handshake_ms": 180.30548095703125,
+        "tunnel_ms": 1146.0180282592773,
+        "total_ms": 1480.4151058197021
+      }
+    },
+    {
+      "proxy": "212.33.248.45:1080",
+      "host": "212.33.248.45",
+      "port": 1080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 1107.8901290893555,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605436.05385,
+      "timing": {
+        "connect_ms": 197.2033977508545,
+        "handshake_ms": 516.9517993927002,
+        "tunnel_ms": 393.65315437316895,
+        "total_ms": 1107.8901290893555
+      }
+    },
+    {
+      "proxy": "8.213.134.213:8081",
+      "host": "8.213.134.213",
+      "port": 8081,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 5264.947891235352,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605436.2073276,
+      "timing": {
+        "connect_ms": 132.2181224822998,
+        "handshake_ms": 2132.328987121582,
+        "tunnel_ms": 3000.3209114074707,
+        "total_ms": 5264.947891235352
+      }
+    },
+    {
+      "proxy": "192.111.130.5:17002",
+      "host": "192.111.130.5",
+      "port": 17002,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 336.9765281677246,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605436.289379,
+      "timing": {
+        "connect_ms": 95.52431106567383,
+        "handshake_ms": 95.38078308105469,
+        "tunnel_ms": 146.02088928222656,
+        "total_ms": 336.9765281677246
+      }
+    },
+    {
+      "proxy": "202.62.39.87:1080",
+      "host": "202.62.39.87",
+      "port": 1080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 6388.192176818848,
+      "error": "Connection timeout",
+      "error_category": "TIMEOUT_CONNECT",
+      "error_stage": "connect",
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605436.6263766,
+      "timing": {
+        "connect_ms": 202.55732536315918,
+        "handshake_ms": 203.08876037597656,
+        "tunnel_ms": 482.10883140563965,
+        "total_ms": 6388.192176818848
+      }
+    },
+    {
+      "proxy": "199.102.104.70:4145",
+      "host": "199.102.104.70",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 144.26064491271973,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605436.8174784,
+      "timing": {
+        "connect_ms": 22.198200225830078,
+        "handshake_ms": 21.96478843688965,
+        "tunnel_ms": 100.00228881835938,
+        "total_ms": 144.26064491271973
+      }
+    },
+    {
+      "proxy": "68.71.245.206:4145",
+      "host": "68.71.245.206",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 158.3094596862793,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605437.0011375,
+      "timing": {
+        "connect_ms": 21.808624267578125,
+        "handshake_ms": 32.643795013427734,
+        "tunnel_ms": 103.78527641296387,
+        "total_ms": 158.3094596862793
+      }
+    },
+    {
+      "proxy": "121.169.46.116:1090",
+      "host": "121.169.46.116",
+      "port": 1090,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 587.0804786682129,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605437.0672207,
+      "timing": {
+        "connect_ms": 130.34939765930176,
+        "handshake_ms": 130.2025318145752,
+        "tunnel_ms": 326.4589309692383,
+        "total_ms": 587.0804786682129
+      }
+    },
+    {
+      "proxy": "203.189.156.11:1080",
+      "host": "203.189.156.11",
+      "port": 1080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 1906.8965911865234,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605437.1680253,
+      "timing": {
+        "connect_ms": 1215.4204845428467,
+        "handshake_ms": 204.9887180328369,
+        "tunnel_ms": 486.39988899230957,
+        "total_ms": 1906.8965911865234
+      }
+    },
+    {
+      "proxy": "69.61.200.104:36181",
+      "host": "69.61.200.104",
+      "port": 36181,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 3263.882875442505,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605437.2405715,
+      "timing": {
+        "connect_ms": 1635.6570720672607,
+        "handshake_ms": 562.7787113189697,
+        "tunnel_ms": 1065.3584003448486,
+        "total_ms": 3263.882875442505
+      }
+    },
+    {
+      "proxy": "72.195.34.58:4145",
+      "host": "72.195.34.58",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 454.1020393371582,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605437.3462498,
+      "timing": {
+        "connect_ms": 126.14178657531738,
+        "handshake_ms": 126.06358528137207,
+        "tunnel_ms": 201.82514190673828,
+        "total_ms": 454.1020393371582
+      }
+    },
+    {
+      "proxy": "8.213.156.191:6666",
+      "host": "8.213.156.191",
+      "port": 6666,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 5314.494609832764,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605437.4766636,
+      "timing": {
+        "connect_ms": 129.8837661743164,
+        "handshake_ms": 2183.8204860687256,
+        "tunnel_ms": 3000.7095336914062,
+        "total_ms": 5314.494609832764
+      }
+    },
+    {
+      "proxy": "8.211.194.78:3129",
+      "host": "8.211.194.78",
+      "port": 3129,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 6739.520788192749,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605439.1904058,
+      "timing": {
+        "connect_ms": 806.804895401001,
+        "handshake_ms": 2941.697359085083,
+        "tunnel_ms": 2990.9491539001465,
+        "total_ms": 6739.520788192749
+      }
+    },
+    {
+      "proxy": "72.195.114.184:4145",
+      "host": "72.195.114.184",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 455.0142288208008,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605439.432539,
+      "timing": {
+        "connect_ms": 126.62053108215332,
+        "handshake_ms": 125.83613395690918,
+        "tunnel_ms": 202.47149467468262,
+        "total_ms": 455.0142288208008
+      }
+    },
+    {
+      "proxy": "72.195.34.42:4145",
+      "host": "72.195.34.42",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 443.70079040527344,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605439.4609227,
+      "timing": {
+        "connect_ms": 122.12157249450684,
+        "handshake_ms": 122.88212776184082,
+        "tunnel_ms": 198.57144355773926,
+        "total_ms": 443.70079040527344
+      }
+    },
+    {
+      "proxy": "104.37.135.145:4145",
+      "host": "104.37.135.145",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 144.99378204345703,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605440.208892,
+      "timing": {
+        "connect_ms": 21.576881408691406,
+        "handshake_ms": 21.42500877380371,
+        "tunnel_ms": 101.90415382385254,
+        "total_ms": 144.99378204345703
+      }
+    },
+    {
+      "proxy": "184.178.172.14:4145",
+      "host": "184.178.172.14",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 466.45188331604004,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605440.6883128,
+      "timing": {
+        "connect_ms": 150.99453926086426,
+        "handshake_ms": 119.79055404663086,
+        "tunnel_ms": 195.5564022064209,
+        "total_ms": 466.45188331604004
+      }
+    },
+    {
+      "proxy": "184.170.248.5:4145",
+      "host": "184.170.248.5",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 339.39552307128906,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605441.3507843,
+      "timing": {
+        "connect_ms": 95.87669372558594,
+        "handshake_ms": 95.31784057617188,
+        "tunnel_ms": 148.13971519470215,
+        "total_ms": 339.39552307128906
+      }
+    },
+    {
+      "proxy": "185.175.47.162:1080",
+      "host": "185.175.47.162",
+      "port": 1080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 1193.0956840515137,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605441.7582722,
+      "timing": {
+        "connect_ms": 190.70148468017578,
+        "handshake_ms": 691.4336681365967,
+        "tunnel_ms": 310.88733673095703,
+        "total_ms": 1193.0956840515137
+      }
+    },
+    {
+      "proxy": "199.102.106.94:4145",
+      "host": "199.102.106.94",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 144.9744701385498,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605442.2656925,
+      "timing": {
+        "connect_ms": 22.150039672851562,
+        "handshake_ms": 21.397113800048828,
+        "tunnel_ms": 101.30119323730469,
+        "total_ms": 144.9744701385498
+      }
+    },
+    {
+      "proxy": "124.248.168.231:1080",
+      "host": "124.248.168.231",
+      "port": 1080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 623.856782913208,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605442.349932,
+      "timing": {
+        "connect_ms": 194.90671157836914,
+        "handshake_ms": 209.75255966186523,
+        "tunnel_ms": 219.12884712219238,
+        "total_ms": 623.856782913208
+      }
+    },
+    {
+      "proxy": "192.111.139.163:19404",
+      "host": "192.111.139.163",
+      "port": 19404,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 338.634729385376,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605442.6003942,
+      "timing": {
+        "connect_ms": 93.11366081237793,
+        "handshake_ms": 93.43528747558594,
+        "tunnel_ms": 151.92627906799316,
+        "total_ms": 338.634729385376
+      }
+    },
+    {
+      "proxy": "8.220.204.215:9080",
+      "host": "8.220.204.215",
+      "port": 9080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 5273.018836975098,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605442.973814,
+      "timing": {
+        "connect_ms": 136.36112213134766,
+        "handshake_ms": 2136.038064956665,
+        "tunnel_ms": 3000.5412101745605,
+        "total_ms": 5273.018836975098
+      }
+    },
+    {
+      "proxy": "62.60.131.203:4363",
+      "host": "62.60.131.203",
+      "port": 4363,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 8224.499702453613,
+      "error": "Connection timeout",
+      "error_category": "TIMEOUT_CONNECT",
+      "error_stage": "connect",
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605443.0145917,
+      "timing": {
+        "connect_ms": 1218.6403274536133,
+        "handshake_ms": 1188.1954669952393,
+        "tunnel_ms": 316.23125076293945,
+        "total_ms": 8224.499702453613
+      }
+    },
+    {
+      "proxy": "198.199.86.11:1080",
+      "host": "198.199.86.11",
+      "port": 1080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 236.50383949279785,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605443.2378433,
+      "timing": {
+        "connect_ms": 76.7824649810791,
+        "handshake_ms": 77.73423194885254,
+        "tunnel_ms": 81.89749717712402,
+        "total_ms": 236.50383949279785
+      }
+    },
+    {
+      "proxy": "102.36.127.231:1080",
+      "host": "102.36.127.231",
+      "port": 1080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 7681.977272033691,
+      "error": "Connection timeout",
+      "error_category": "TIMEOUT_CONNECT",
+      "error_stage": "connect",
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605443.4265563,
+      "timing": {
+        "connect_ms": 1329.2279243469238,
+        "handshake_ms": 295.0127124786377,
+        "tunnel_ms": 555.8781623840332,
+        "total_ms": 7681.977272033691
+      }
+    },
+    {
+      "proxy": "128.199.202.122:1080",
+      "host": "128.199.202.122",
+      "port": 1080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 548.3407974243164,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605443.8822324,
+      "timing": {
+        "connect_ms": 171.3705062866211,
+        "handshake_ms": 201.2467384338379,
+        "tunnel_ms": 175.6594181060791,
+        "total_ms": 548.3407974243164
+      }
+    },
+    {
+      "proxy": "203.189.137.214:1080",
+      "host": "203.189.137.214",
+      "port": 1080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 1974.510669708252,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605444.1391659,
+      "timing": {
+        "connect_ms": 1221.961498260498,
+        "handshake_ms": 244.31562423706055,
+        "tunnel_ms": 508.1758499145508,
+        "total_ms": 1974.510669708252
+      }
+    },
+    {
+      "proxy": "142.54.228.193:4145",
+      "host": "142.54.228.193",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 144.6819305419922,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605444.2645383,
+      "timing": {
+        "connect_ms": 22.062063217163086,
+        "handshake_ms": 21.698713302612305,
+        "tunnel_ms": 100.85320472717285,
+        "total_ms": 144.6819305419922
+      }
+    },
+    {
+      "proxy": "67.201.59.70:4145",
+      "host": "67.201.59.70",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 141.77751541137695,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605444.4092476,
+      "timing": {
+        "connect_ms": 22.362232208251953,
+        "handshake_ms": 23.144245147705078,
+        "tunnel_ms": 96.20475769042969,
+        "total_ms": 141.77751541137695
+      }
+    },
+    {
+      "proxy": "98.188.47.132:4145",
+      "host": "98.188.47.132",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 457.019567489624,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605444.5041819,
+      "timing": {
+        "connect_ms": 128.9536952972412,
+        "handshake_ms": 125.7789134979248,
+        "tunnel_ms": 202.1951675415039,
+        "total_ms": 457.019567489624
+      }
+    },
+    {
+      "proxy": "194.28.162.12:1080",
+      "host": "194.28.162.12",
+      "port": 1080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 726.9060611724854,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605445.4287796,
+      "timing": {
+        "connect_ms": 193.11881065368652,
+        "handshake_ms": 192.8575038909912,
+        "tunnel_ms": 340.8644199371338,
+        "total_ms": 726.9060611724854
+      }
+    },
+    {
+      "proxy": "184.178.172.3:4145",
+      "host": "184.178.172.3",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 443.73345375061035,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605445.861824,
+      "timing": {
+        "connect_ms": 125.13375282287598,
+        "handshake_ms": 127.69460678100586,
+        "tunnel_ms": 190.84405899047852,
+        "total_ms": 443.73345375061035
+      }
+    },
+    {
+      "proxy": "87.117.11.57:1080",
+      "host": "87.117.11.57",
+      "port": 1080,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 7333.553075790405,
+      "error": "Connection timeout",
+      "error_category": "TIMEOUT_CONNECT",
+      "error_stage": "connect",
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605446.1769574,
+      "timing": {
+        "connect_ms": 1242.1362400054932,
+        "handshake_ms": 213.81115913391113,
+        "tunnel_ms": 376.5723705291748,
+        "total_ms": 7333.553075790405
+      }
+    },
+    {
+      "proxy": "98.181.137.80:4145",
+      "host": "98.181.137.80",
+      "port": 4145,
+      "protocol": "socks5",
+      "reachable": true,
+      "socks5_valid": true,
+      "tunnel_works": true,
+      "http_works": false,
+      "latency_ms": 527.3399353027344,
+      "auth_required": false,
+      "anonymity": "unknown",
+      "timestamp": 1767605446.3055818,
+      "timing": {
+        "connect_ms": 117.92612075805664,
+        "handshake_ms": 120.37372589111328,
+        "tunnel_ms": 288.9726161956787,
+        "total_ms": 527.3399353027344
+      }
+    }
+  ]
+}
