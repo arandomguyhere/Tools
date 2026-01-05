@@ -1,0 +1,167 @@
+name: Proxy Scanner
+
+on:
+  schedule:
+    # Run every 6 hours
+    - cron: '0 */6 * * *'
+  push:
+    branches: [main, master]
+    paths:
+      - 'socks5-scanner/src/**'
+      - 'socks5-scanner/config/**'
+      - '.github/workflows/scan.yml'
+  workflow_dispatch:
+    inputs:
+      concurrency:
+        description: 'Concurrency level'
+        required: false
+        default: '100'
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('socks5-scanner/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        working-directory: socks5-scanner
+        run: |
+          python -m pip install --upgrade pip
+          pip install aiohttp requests pyyaml
+
+      - name: Create output directories
+        working-directory: socks5-scanner
+        run: mkdir -p proxies results
+
+      - name: Run proxy scan
+        working-directory: socks5-scanner
+        continue-on-error: true
+        run: |
+          python -c "
+          import asyncio
+          import json
+          import os
+          from datetime import datetime
+
+          from src.async_scanner_v2 import AsyncScanner
+          from src.core import ScanConfig
+
+          async def main():
+              config = ScanConfig(
+                  connect_timeout=5.0,
+                  max_concurrent=int(os.environ.get('CONCURRENCY', '100'))
+              )
+
+              # Proxy sources
+              sources = [
+                  'https://raw.githubusercontent.com/TheSpeedX/SOCKS-List/master/socks5.txt',
+                  'https://raw.githubusercontent.com/monosans/proxy-list/main/proxies/socks5.txt',
+                  'https://raw.githubusercontent.com/hookzof/socks5_list/master/proxy.txt',
+                  'https://raw.githubusercontent.com/ShiftyTR/Proxy-List/master/socks5.txt',
+                  'https://raw.githubusercontent.com/roosterkid/openproxylist/main/SOCKS5_RAW.txt',
+                  'https://api.proxyscrape.com/v2/?request=getproxies&protocol=socks5&timeout=10000&country=all',
+              ]
+
+              # Fetch proxies
+              import aiohttp
+              proxies = set()
+              async with aiohttp.ClientSession() as session:
+                  for url in sources:
+                      try:
+                          async with session.get(url, timeout=aiohttp.ClientTimeout(total=30)) as resp:
+                              if resp.status == 200:
+                                  text = await resp.text()
+                                  for line in text.strip().split('\n'):
+                                      line = line.strip()
+                                      if ':' in line and line[0].isdigit():
+                                          proxies.add(line.split()[0])
+                      except Exception as e:
+                          print(f'Failed to fetch {url}: {e}')
+
+              print(f'Collected {len(proxies)} unique proxies')
+
+              if not proxies:
+                  print('No proxies found')
+                  return
+
+              # Scan
+              async with AsyncScanner(config) as scanner:
+                  results = await scanner.scan_many(list(proxies))
+
+              # Save results
+              working = results.get_working()
+              valid = [r for r in results.all_results if r.socks5_valid]
+
+              print(f'Results: {results.total} scanned, {len(valid)} valid, {len(working)} working')
+
+              # Save working proxies
+              with open('proxies/proxies_working.txt', 'w') as f:
+                  for r in working:
+                      f.write(f'{r.proxy}\n')
+
+              # Save valid proxies
+              with open('proxies/proxies_valid.txt', 'w') as f:
+                  for r in valid:
+                      f.write(f'{r.proxy}\n')
+
+              # Save full results as JSON
+              with open('proxies/results.json', 'w') as f:
+                  json.dump({
+                      'timestamp': datetime.utcnow().isoformat() + 'Z',
+                      'stats': {
+                          'total': results.total,
+                          'valid': len(valid),
+                          'working': len(working),
+                      },
+                      'proxies': [r.to_dict() for r in working]
+                  }, f, indent=2, default=str)
+
+          asyncio.run(main())
+          "
+        env:
+          CONCURRENCY: ${{ github.event.inputs.concurrency || '100' }}
+
+      - name: Generate summary
+        working-directory: socks5-scanner
+        continue-on-error: true
+        run: |
+          echo "## Proxy Scan Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -f proxies/results.json ]; then
+            TOTAL=$(python -c "import json; d=json.load(open('proxies/results.json')); print(d.get('stats',{}).get('total', 0))" 2>/dev/null || echo "0")
+            VALID=$(python -c "import json; d=json.load(open('proxies/results.json')); print(d.get('stats',{}).get('valid', 0))" 2>/dev/null || echo "0")
+            WORKING=$(python -c "import json; d=json.load(open('proxies/results.json')); print(d.get('stats',{}).get('working', 0))" 2>/dev/null || echo "0")
+            echo "| Metric | Count |" >> $GITHUB_STEP_SUMMARY
+            echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+            echo "| Total Scanned | $TOTAL |" >> $GITHUB_STEP_SUMMARY
+            echo "| SOCKS5 Valid | $VALID |" >> $GITHUB_STEP_SUMMARY
+            echo "| Fully Working | $WORKING |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "No results file found" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Commit results
+        working-directory: socks5-scanner
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add proxies/ || true
+          git diff --staged --quiet || git commit -m "Update proxy list [skip ci]"
+          git push || true

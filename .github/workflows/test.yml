@@ -1,0 +1,73 @@
+name: Tests
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'socks5-scanner/src/**'
+      - 'socks5-scanner/tests/**'
+      - '.github/workflows/test.yml'
+  pull_request:
+    branches: [main, master]
+    paths:
+      - 'socks5-scanner/src/**'
+      - 'socks5-scanner/tests/**'
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.9', '3.10', '3.11', '3.12']
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('socks5-scanner/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-${{ matrix.python-version }}-
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        working-directory: socks5-scanner
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio pytest-cov aiohttp requests pyyaml
+
+      - name: Run tests
+        working-directory: socks5-scanner
+        run: |
+          pytest tests/ -v --tb=short
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install linting tools
+        run: pip install flake8
+
+      - name: Lint with flake8
+        working-directory: socks5-scanner
+        run: |
+          # Check for syntax errors
+          flake8 src/ tests/ --count --select=E9,F63,F7,F82 --show-source --statistics
+        continue-on-error: true
