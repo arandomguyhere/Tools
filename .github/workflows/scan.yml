@@ -107,7 +107,7 @@ jobs:
 
               # Save results
               working = results.get_working()
-              valid = [r for r in results.all_results if r.socks5_valid]
+              valid = [r for r in results.results if r.socks5_valid]
 
               print(f'Results: {results.total} scanned, {len(valid)} valid, {len(working)} working')
 
