@@ -21,6 +21,7 @@ env:
 jobs:
   scan:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     permissions:
       contents: write
@@ -38,14 +39,18 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r socks5-scanner/requirements.txt
+
+      - name: Create directories
+        run: |
+          mkdir -p socks5-scanner/output
+          mkdir -p socks5-scanner/proxies
 
       - name: Run proxy scan
         id: scan
+        working-directory: socks5-scanner
+        continue-on-error: true
         run: |
-          # Create output directory
-          mkdir -p output
-
           # Run the scanner with async mode
           python -m src.cli fetch \
             --sources default \
@@ -62,89 +67,107 @@ jobs:
           echo "working=$WORKING" >> $GITHUB_OUTPUT
 
       - name: Generate proxy lists
+        working-directory: socks5-scanner
+        continue-on-error: true
         run: |
-          # Create dated output files
-          DATE=$(date +%Y%m%d_%H%M%S)
-
           # Find the latest results
           LATEST_JSON=$(ls -t output/*.json 2>/dev/null | head -1)
-          LATEST_TXT=$(ls -t output/*.txt 2>/dev/null | head -1)
 
           if [ -f "$LATEST_JSON" ]; then
             # Extract working proxies to standard files
-            python -c "
-          import json
-          with open('$LATEST_JSON') as f:
-              data = json.load(f)
+            python3 << 'EOF'
+import json
+import sys
 
-          # Working proxies (tunnel works)
-          working = [r['proxy'] for r in data.get('results', [])
-                     if r.get('tunnel_works')]
+try:
+    with open("$LATEST_JSON".replace("$LATEST_JSON", sys.argv[1] if len(sys.argv) > 1 else "")) as f:
+        data = json.load(f)
+except:
+    # Fallback: find JSON file
+    import glob
+    files = sorted(glob.glob("output/*.json"), key=lambda x: -1)
+    if not files:
+        print("No JSON files found")
+        sys.exit(0)
+    with open(files[0]) as f:
+        data = json.load(f)
 
-          # Valid proxies (socks5 handshake works)
-          valid = [r['proxy'] for r in data.get('results', [])
-                   if r.get('socks5_valid')]
+# Working proxies (tunnel works)
+working = [r['proxy'] for r in data.get('results', []) if r.get('tunnel_works')]
 
-          with open('proxies/socks5.txt', 'w') as f:
-              f.write('\n'.join(working))
+# Valid proxies (socks5 handshake works)
+valid = [r['proxy'] for r in data.get('results', []) if r.get('socks5_valid')]
 
-          with open('proxies/socks5_valid.txt', 'w') as f:
-              f.write('\n'.join(valid))
+with open('proxies/socks5.txt', 'w') as f:
+    f.write('\n'.join(working))
 
-          print(f'Working: {len(working)}, Valid: {len(valid)}')
-          "
+with open('proxies/socks5_valid.txt', 'w') as f:
+    f.write('\n'.join(valid))
+
+print(f'Working: {len(working)}, Valid: {len(valid)}')
+EOF
+          else
+            echo "No JSON output found"
           fi
 
-      - name: Update README badge
+      - name: Update README stats
+        working-directory: socks5-scanner
         run: |
-          WORKING=${{ steps.scan.outputs.working }}
-          TOTAL=${{ steps.scan.outputs.total }}
+          WORKING=${{ steps.scan.outputs.working || '0' }}
+          TOTAL=${{ steps.scan.outputs.total || '0' }}
           DATE=$(date -u +"%Y-%m-%d %H:%M UTC")
 
-          # Update or create badge in README
+          # Update stats in proxies README
           if [ -f "proxies/README.md" ]; then
             sed -i "s/Last updated:.*/Last updated: $DATE/" proxies/README.md
             sed -i "s/Working proxies:.*/Working proxies: $WORKING/" proxies/README.md
           fi
 
       - name: Commit and push results
+        working-directory: socks5-scanner
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
 
           # Add proxy files
-          git add proxies/ output/ || true
+          git add proxies/ || true
+          git add output/*.json output/*.txt 2>/dev/null || true
 
           # Check if there are changes
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
             DATE=$(date -u +"%Y-%m-%d %H:%M UTC")
-            WORKING=${{ steps.scan.outputs.working }}
+            WORKING=${{ steps.scan.outputs.working || '0' }}
             git commit -m "Update proxy list: $WORKING working proxies ($DATE)"
             git push
           fi
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: scan-results-${{ github.run_number }}
           path: |
-            output/
-            scan.log
+            socks5-scanner/output/
+            socks5-scanner/scan.log
           retention-days: 7
 
       - name: Job summary
+        if: always()
         run: |
-          WORKING=${{ steps.scan.outputs.working }}
-          TOTAL=${{ steps.scan.outputs.total }}
+          WORKING=${{ steps.scan.outputs.working || '0' }}
+          TOTAL=${{ steps.scan.outputs.total || '0' }}
 
-          echo "## Scan Results" >> $GITHUB_STEP_SUMMARY
+          echo "## 🔍 Scan Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
           echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
           echo "| Total Scanned | $TOTAL |" >> $GITHUB_STEP_SUMMARY
           echo "| Working | $WORKING |" >> $GITHUB_STEP_SUMMARY
-          echo "| Success Rate | $(echo "scale=1; $WORKING * 100 / $TOTAL" | bc 2>/dev/null || echo "0")% |" >> $GITHUB_STEP_SUMMARY
+          if [ "$TOTAL" -gt 0 ]; then
+            RATE=$(echo "scale=1; $WORKING * 100 / $TOTAL" | bc 2>/dev/null || echo "0")
+            echo "| Success Rate | ${RATE}% |" >> $GITHUB_STEP_SUMMARY
+          fi
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Download: \`proxies/socks5.txt\`" >> $GITHUB_STEP_SUMMARY
+          echo "📥 Download: \`proxies/socks5.txt\`" >> $GITHUB_STEP_SUMMARY
