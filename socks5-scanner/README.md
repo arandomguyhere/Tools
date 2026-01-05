@@ -43,12 +43,21 @@ proxies = requests.get("https://raw.githubusercontent.com/arandomguyhere/Tools/m
 | Feature | Description |
 |---------|-------------|
 | **Sync & Async modes** | Thread-pool or asyncio with semaphore |
-| **Structured results** | Full `ProxyResult` objects |
+| **GeoIP enrichment** | Country, city, ASN, ISP/org via ip-api.com |
+| **Structured results** | Full `ProxyResult` objects with geo data |
 | **Error classification** | 15+ error categories |
 | **Configurable timeouts** | Per-stage (connect/read/write/http) |
 | **Retry logic** | Exponential backoff |
 | **Export formats** | JSON, CSV, TXT |
 | **Pipeline hooks** | Callbacks, filters, webhooks |
+
+### Web UI Features
+- Country flags and codes
+- ASN and organization info
+- Latency with color coding (green/yellow/red)
+- Filter by IP, country, ASN, or org
+- Copy individual proxies or entire list
+- Download as file
 
 ---
 
@@ -113,7 +122,7 @@ results = asyncio.run(scan())
 
 ## Structured Results
 
-Every scan returns structured `ProxyResult` objects:
+Every scan returns structured `ProxyResult` objects with GeoIP data:
 
 ```json
 {
@@ -130,6 +139,15 @@ Every scan returns structured `ProxyResult` objects:
         "handshake_ms": 8,
         "tunnel_ms": 15,
         "http_ms": 50
+    },
+    "geo": {
+        "country": "United States",
+        "country_code": "US",
+        "city": "New York",
+        "isp": "DigitalOcean LLC",
+        "org": "DigitalOcean",
+        "asn": "AS14061",
+        "asn_org": "DIGITALOCEAN-ASN"
     }
 }
 ```
@@ -275,6 +293,9 @@ socks5-scanner/
 │   ├── core.py               # Types, enums, results
 │   ├── sync_scanner.py       # Sync scanner
 │   ├── async_scanner_v2.py   # Async scanner
+│   ├── geoip.py              # GeoIP enrichment (MaxMind + ip-api)
+│   ├── anonymity.py          # Anonymity detection
+│   ├── fingerprint.py        # Proxy quality profiling
 │   ├── logger.py             # Logging
 │   ├── export.py             # Export & hooks
 │   ├── cli.py                # CLI interface
@@ -288,22 +309,31 @@ socks5-scanner/
 
 ---
 
-## Legacy Features
+## Additional Modules
 
 ```python
+# GeoIP enrichment (supports MaxMind databases or ip-api.com)
+from src.geoip import GeoIPEnricher
+enricher = GeoIPEnricher()
+info = enricher.enrich("1.2.3.4")
+# Returns: country, city, ASN, ISP, org
+
+# Anonymity detection
+from src.anonymity import AnonymityChecker
+checker = AnonymityChecker()
+result = checker.check("1.2.3.4", 1080)
+# Returns: anonymity_level (transparent/anonymous/elite), headers leaked
+
+# Proxy quality profiling
+from src.fingerprint import ProxyProfiler
+profiler = ProxyProfiler()
+profile = profiler.profile("1.2.3.4", 1080)
+# Returns: quality_tier, proxy_type, stability_score, estimated_hops
+
 # GitHub hunting (discovers new proxy sources)
 from src import ProxyHunter
 hunter = ProxyHunter()
 proxies, results = hunter.hunt()
-
-# IP enrichment (ASN, geo, ownership)
-from src import IPEnricher
-enricher = IPEnricher()
-info = enricher.enrich("1.2.3.4")
-
-# Quick scan from static sources
-from src import quick_scan
-results = quick_scan()
 ```
 
 ---
