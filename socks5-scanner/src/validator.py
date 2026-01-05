@@ -1,480 +1,160 @@
 """
-Proxy Validator - Tests SOCKS5 proxy connectivity and functionality.
+Proxy Validator - LEGACY COMPATIBILITY WRAPPER.
 
-Includes IP enrichment for ASN, geolocation, and ownership data.
+This module is deprecated. Use src.sync_scanner.SyncScanner instead.
+
+This wrapper maintains backwards compatibility with existing code while
+delegating to the new sync_scanner module.
 """
 
-import concurrent.futures
-import os
-import socket
-import struct
-import time
+import warnings
 from typing import Dict, List, Optional, Tuple, Any
 
-import requests
+from .sync_scanner import SyncScanner
+from .core import ScanConfig, ProxyResult, ErrorCategory
+from .utils import IPEnricher
 
-from .utils import (
-    Color, parse_proxy, format_proxy, save_json, save_proxies_to_file,
-    progress_bar, format_time, Timer, IPEnricher, format_asn_info,
-    format_ownership_info, format_geo_info, format_proxy_type
+# Emit deprecation warning on import
+warnings.warn(
+    "src.validator is deprecated. Use src.sync_scanner.SyncScanner instead.",
+    DeprecationWarning,
+    stacklevel=2
 )
 
 
 class ProxyValidator:
-    """Validates SOCKS5 proxies for connectivity and functionality."""
+    """
+    DEPRECATED: Use SyncScanner instead.
+
+    This class maintains backwards compatibility with the old API.
+    """
 
     def __init__(self, config: Optional[Dict] = None):
-        self.config = config or {}
-        self.timeout = self.config.get('timeout', 5)
-        self.test_urls = self.config.get('test_urls', [
+        """Initialize with config dict for backwards compatibility."""
+        config = config or {}
+        self.timeout = config.get('timeout', 5)
+        self.test_urls = config.get('test_urls', [
             "http://httpbin.org/ip",
             "http://icanhazip.com",
         ])
-        self.verify_ssl = self.config.get('verify_ssl', False)
-        self.enricher = IPEnricher() if self.config.get('enrich', False) else None
+        self.verify_ssl = config.get('verify_ssl', False)
+        self.enricher = IPEnricher() if config.get('enrich', False) else None
 
-    def test_socks5_handshake(self, ip: str, port: int,
-                               timeout: Optional[int] = None) -> Tuple[bool, str]:
+        # Create underlying scanner with converted config
+        scan_config = ScanConfig(
+            connect_timeout=float(self.timeout),
+            read_timeout=float(self.timeout),
+            test_url=self.test_urls[0] if self.test_urls else "http://httpbin.org/ip"
+        )
+        self._scanner = SyncScanner(scan_config)
+
+    def test_socks5_handshake(
+        self,
+        ip: str,
+        port: int,
+        timeout: Optional[int] = None
+    ) -> Tuple[bool, str]:
         """
         Test SOCKS5 proxy handshake.
 
         Returns:
             Tuple of (success: bool, message: str)
         """
-        timeout = timeout or self.timeout
+        proxy = f"{ip}:{port}"
+        result = self._scanner.scan_one(proxy)
 
-        try:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.settimeout(timeout)
-
-            # Connect to proxy
-            sock.connect((ip, port))
-
-            # SOCKS5 greeting: version(1) + nmethods(1) + methods(nmethods)
-            # We send: version=5, nmethods=1, method=0 (no auth)
-            sock.sendall(b'\x05\x01\x00')
-
-            # Receive response: version(1) + method(1)
-            response = sock.recv(2)
-
-            sock.close()
-
-            if len(response) < 2:
-                return False, "Invalid response"
-
-            if response[0:1] != b'\x05':
-                return False, "Not SOCKS5"
-
-            if response[1:2] == b'\x00':
-                return True, "OK (no auth)"
-            elif response[1:2] == b'\x02':
+        if result.socks5_valid:
+            if result.auth_required:
                 return True, "OK (auth required)"
-            elif response[1:2] == b'\xff':
-                return False, "No acceptable methods"
-            else:
-                return False, f"Unknown method: {response[1]}"
+            return True, "OK (no auth)"
+        elif result.error:
+            return False, result.error
+        else:
+            return False, "Unknown error"
 
-        except socket.timeout:
-            return False, "Timeout"
-        except ConnectionRefusedError:
-            return False, "Connection refused"
-        except ConnectionResetError:
-            return False, "Connection reset"
-        except OSError as e:
-            return False, f"OS error: {e}"
-        except Exception as e:
-            return False, str(e)
-
-    def test_socks5_connect(self, ip: str, port: int,
-                            target_host: str = "httpbin.org",
-                            target_port: int = 80,
-                            timeout: Optional[int] = None) -> Tuple[bool, str]:
+    def test_socks5_connect(
+        self,
+        ip: str,
+        port: int,
+        target_host: str = "httpbin.org",
+        target_port: int = 80,
+        timeout: Optional[int] = None
+    ) -> Tuple[bool, str]:
         """
         Test SOCKS5 proxy by connecting to a target through it.
 
         Returns:
             Tuple of (success: bool, message: str)
         """
-        timeout = timeout or self.timeout
+        proxy = f"{ip}:{port}"
+        result = self._scanner.scan_one(proxy)
 
-        try:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.settimeout(timeout)
+        if result.tunnel_works:
+            return True, "Connection successful"
+        elif result.error:
+            return False, result.error
+        else:
+            return False, "Tunnel failed"
 
-            # Connect to proxy
-            sock.connect((ip, port))
-
-            # SOCKS5 handshake
-            sock.sendall(b'\x05\x01\x00')
-            response = sock.recv(2)
-
-            if response != b'\x05\x00':
-                sock.close()
-                return False, "Handshake failed"
-
-            # SOCKS5 connect request
-            # version(1) + cmd(1) + rsv(1) + atyp(1) + dst.addr(variable) + dst.port(2)
-            # cmd: 0x01 = connect
-            # atyp: 0x03 = domain name
-
-            domain_bytes = target_host.encode('utf-8')
-            request = (
-                b'\x05\x01\x00\x03' +
-                bytes([len(domain_bytes)]) +
-                domain_bytes +
-                struct.pack('>H', target_port)
-            )
-            sock.sendall(request)
-
-            # Receive response
-            response = sock.recv(10)
-            sock.close()
-
-            if len(response) < 2:
-                return False, "Invalid connect response"
-
-            if response[0:1] != b'\x05':
-                return False, "Not SOCKS5"
-
-            reply_code = response[1]
-            if reply_code == 0x00:
-                return True, "Connection successful"
-            elif reply_code == 0x01:
-                return False, "General failure"
-            elif reply_code == 0x02:
-                return False, "Connection not allowed"
-            elif reply_code == 0x03:
-                return False, "Network unreachable"
-            elif reply_code == 0x04:
-                return False, "Host unreachable"
-            elif reply_code == 0x05:
-                return False, "Connection refused by target"
-            elif reply_code == 0x06:
-                return False, "TTL expired"
-            elif reply_code == 0x07:
-                return False, "Command not supported"
-            elif reply_code == 0x08:
-                return False, "Address type not supported"
-            else:
-                return False, f"Unknown error: {reply_code}"
-
-        except socket.timeout:
-            return False, "Timeout"
-        except Exception as e:
-            return False, str(e)
-
-    def test_http_through_proxy(self, proxy: str,
-                                 url: Optional[str] = None,
-                                 timeout: Optional[int] = None) -> Tuple[bool, str, Optional[str]]:
+    def validate_proxy(self, proxy: str, timeout: Optional[int] = None) -> Dict:
         """
-        Test HTTP request through SOCKS5 proxy.
+        Full validation of a SOCKS5 proxy.
 
-        Returns:
-            Tuple of (success: bool, message: str, response_ip: Optional[str])
+        Returns dict with validation results for backwards compatibility.
         """
-        url = url or self.test_urls[0]
-        timeout = timeout or self.timeout
+        result = self._scanner.scan_one(proxy)
 
-        proxies = {
-            'http': f'socks5h://{proxy}',
-            'https': f'socks5h://{proxy}'
+        # Convert to old dict format
+        return {
+            'proxy': result.proxy,
+            'host': result.host,
+            'port': result.port,
+            'reachable': result.reachable,
+            'socks5_valid': result.socks5_valid,
+            'tunnel_works': result.tunnel_works,
+            'auth_required': result.auth_required,
+            'latency_ms': result.latency_ms,
+            'error': result.error,
+            'external_ip': result.external_ip,
+            'working': result.is_working,
         }
 
-        try:
-            response = requests.get(
-                url,
-                proxies=proxies,
-                timeout=timeout,
-                verify=self.verify_ssl,
-                headers={'User-Agent': 'curl/7.88.0'}
-            )
-
-            if response.status_code == 200:
-                # Try to extract IP from response if it's an IP check service
-                try:
-                    if 'origin' in response.text.lower() or 'ip' in url.lower():
-                        data = response.json()
-                        ip = data.get('origin', data.get('ip', ''))
-                        return True, "HTTP OK", ip
-                except Exception:
-                    pass
-                return True, "HTTP OK", None
-
-            return False, f"HTTP {response.status_code}", None
-
-        except requests.exceptions.Timeout:
-            return False, "HTTP timeout", None
-        except requests.exceptions.ProxyError as e:
-            return False, "Proxy error", None
-        except requests.exceptions.ConnectionError:
-            return False, "Connection error", None
-        except Exception as e:
-            return False, str(e), None
-
-    def validate_proxy(self, proxy: str) -> Dict[str, Any]:
+    def validate_many(
+        self,
+        proxies: List[str],
+        max_workers: int = 20,
+        callback=None
+    ) -> List[Dict]:
         """
-        Fully validate a single proxy.
+        Validate multiple proxies in parallel.
 
-        Returns a dict with validation results.
+        Returns list of validation results for backwards compatibility.
         """
-        result = {
-            'proxy': proxy,
-            'valid': False,
-            'socks5_handshake': False,
-            'socks5_connect': False,
-            'http_working': False,
-            'response_time_ms': None,
-            'external_ip': None,
-            'error': None
-        }
+        results = self._scanner.scan_many(proxies, max_workers=max_workers)
 
-        parsed = parse_proxy(proxy)
-        if not parsed:
-            result['error'] = "Invalid proxy format"
-            return result
+        validated = []
+        for result in results.all_results:
+            validated.append({
+                'proxy': result.proxy,
+                'host': result.host,
+                'port': result.port,
+                'reachable': result.reachable,
+                'socks5_valid': result.socks5_valid,
+                'tunnel_works': result.tunnel_works,
+                'auth_required': result.auth_required,
+                'latency_ms': result.latency_ms,
+                'error': result.error,
+                'external_ip': result.external_ip,
+                'working': result.is_working,
+            })
+            if callback:
+                callback(validated[-1])
 
-        ip, port = parsed
-        start_time = time.time()
+        return validated
 
-        # Test 1: SOCKS5 handshake
-        success, msg = self.test_socks5_handshake(ip, port)
-        result['socks5_handshake'] = success
-        if not success:
-            result['error'] = f"Handshake: {msg}"
-            return result
 
-        # Test 2: SOCKS5 connect
-        success, msg = self.test_socks5_connect(ip, port)
-        result['socks5_connect'] = success
-        if not success:
-            result['error'] = f"Connect: {msg}"
-            # Still mark as valid if handshake passed
-            result['valid'] = result['socks5_handshake']
-            result['response_time_ms'] = int((time.time() - start_time) * 1000)
-            return result
-
-        # Test 3: HTTP through proxy
-        success, msg, ext_ip = self.test_http_through_proxy(proxy)
-        result['http_working'] = success
-        result['external_ip'] = ext_ip
-
-        result['valid'] = result['socks5_handshake']
-        result['response_time_ms'] = int((time.time() - start_time) * 1000)
-
-        if not success:
-            result['error'] = f"HTTP: {msg}"
-
-        return result
-
-    def validate_proxies(self, proxies: List[str],
-                         max_workers: int = 20,
-                         show_progress: bool = True,
-                         enrich: bool = False) -> Dict[str, Any]:
-        """
-        Validate multiple proxies concurrently.
-
-        Args:
-            proxies: List of proxy strings (ip:port)
-            max_workers: Concurrent validation threads
-            show_progress: Display progress bar
-            enrich: Enable IP enrichment (ASN, geo, ownership)
-
-        Returns a dict with all results and statistics.
-        """
-        results = {
-            'all': [],
-            'valid': [],
-            'working': [],
-            'stats': {
-                'total': len(proxies),
-                'valid': 0,
-                'working': 0,
-                'failed': 0
-            }
-        }
-
-        if not proxies:
-            return results
-
-        if show_progress:
-            print(f"\n{Color.cyan('Validating')} {len(proxies)} proxies "
-                  f"with {max_workers} threads...")
-
-        completed = 0
-        start_time = time.time()
-
-        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-            future_to_proxy = {
-                executor.submit(self.validate_proxy, proxy): proxy
-                for proxy in proxies
-            }
-
-            for future in concurrent.futures.as_completed(future_to_proxy):
-                try:
-                    result = future.result()
-                    results['all'].append(result)
-
-                    if result['valid']:
-                        results['valid'].append(result)
-                        results['stats']['valid'] += 1
-
-                        if result['http_working']:
-                            results['working'].append(result)
-                            results['stats']['working'] += 1
-                    else:
-                        results['stats']['failed'] += 1
-
-                except Exception as e:
-                    results['stats']['failed'] += 1
-
-                completed += 1
-
-                if show_progress and completed % 10 == 0:
-                    print(f"\r{progress_bar(completed, len(proxies), prefix='Progress: ')}", end='')
-
-        if show_progress:
-            print(f"\r{progress_bar(completed, len(proxies), prefix='Progress: ')}")
-            elapsed = time.time() - start_time
-            print(f"Completed in {format_time(elapsed)}")
-
-        # Enrich valid proxies with ASN/geo/ownership data
-        if enrich and results['valid']:
-            self._enrich_results(results, show_progress)
-
-        return results
-
-    def _enrich_results(self, results: Dict, show_progress: bool = True):
-        """Enrich valid proxy results with ASN, geo, and ownership data."""
-        valid_proxies = results.get('valid', [])
-
-        if not valid_proxies:
-            return
-
-        if show_progress:
-            print(f"\n{Color.cyan('Enriching')} {len(valid_proxies)} valid proxies...")
-
-        enricher = self.enricher or IPEnricher()
-
-        # Extract unique IPs
-        ips = []
-        for proxy_result in valid_proxies:
-            parsed = parse_proxy(proxy_result['proxy'])
-            if parsed:
-                ips.append(parsed[0])
-
-        # Batch enrich
-        enrichment_data = enricher.enrich_batch(
-            list(set(ips)),
-            max_workers=10,
-            show_progress=show_progress,
-            rate_limit_delay=0.05
-        )
-
-        # Attach enrichment to results
-        for proxy_result in valid_proxies:
-            parsed = parse_proxy(proxy_result['proxy'])
-            if parsed:
-                ip = parsed[0]
-                if ip in enrichment_data:
-                    proxy_result['enrichment'] = enrichment_data[ip]
-
-        # Also enrich working proxies (they're a subset of valid)
-        for proxy_result in results.get('working', []):
-            parsed = parse_proxy(proxy_result['proxy'])
-            if parsed:
-                ip = parsed[0]
-                if ip in enrichment_data:
-                    proxy_result['enrichment'] = enrichment_data[ip]
-
-        if show_progress:
-            enriched_count = sum(1 for p in valid_proxies if 'enrichment' in p)
-            print(f"  Enriched {enriched_count}/{len(valid_proxies)} proxies")
-
-    def save_results(self, results: Dict, output_dir: str = "./results",
-                     timestamp: Optional[str] = None) -> Dict[str, str]:
-        """
-        Save validation results to files.
-
-        Includes enriched data (ASN, geo, ownership) if available.
-
-        Returns dict of saved file paths.
-        """
-        import time as time_module
-
-        timestamp = timestamp or time_module.strftime("%Y%m%d_%H%M%S")
-        os.makedirs(output_dir, exist_ok=True)
-
-        saved_files = {}
-
-        # Save full results as JSON
-        json_path = os.path.join(output_dir, f"results_{timestamp}.json")
-        if save_json(results, json_path):
-            saved_files['json'] = json_path
-
-        # Save valid proxies as text
-        valid_proxies = [r['proxy'] for r in results.get('valid', [])]
-        if valid_proxies:
-            txt_path = os.path.join(output_dir, f"valid_proxies_{timestamp}.txt")
-            if save_proxies_to_file(valid_proxies, txt_path):
-                saved_files['valid_txt'] = txt_path
-
-        # Save working proxies (HTTP tested) as text
-        working_proxies = [r['proxy'] for r in results.get('working', [])]
-        if working_proxies:
-            txt_path = os.path.join(output_dir, f"working_proxies_{timestamp}.txt")
-            if save_proxies_to_file(working_proxies, txt_path):
-                saved_files['working_txt'] = txt_path
-
-        # Save enriched data as detailed CSV-like format
-        enriched_proxies = [r for r in results.get('working', []) if 'enrichment' in r]
-        if enriched_proxies:
-            detailed_path = os.path.join(output_dir, f"proxies_detailed_{timestamp}.txt")
-            self._save_detailed_results(enriched_proxies, detailed_path)
-            saved_files['detailed_txt'] = detailed_path
-
-        print(f"\n{Color.green('Results saved:')}")
-        for key, path in saved_files.items():
-            print(f"  - {path}")
-
-        return saved_files
-
-    def _save_detailed_results(self, proxies: List[Dict], filepath: str):
-        """Save detailed proxy results with enrichment data."""
-        with open(filepath, 'w', encoding='utf-8') as f:
-            # Header
-            f.write("# SOCKS5 Proxy List with ASN/Geo/Ownership Data\n")
-            f.write("# Format: proxy | country | city | asn | isp | org | type | response_ms\n")
-            f.write("#" + "=" * 100 + "\n\n")
-
-            for proxy_data in proxies:
-                proxy = proxy_data['proxy']
-                enrichment = proxy_data.get('enrichment', {})
-                response_ms = proxy_data.get('response_time_ms', '?')
-
-                country = enrichment.get('country_code') or enrichment.get('country', '')[:2]
-                city = enrichment.get('city', '')[:20]
-                asn = enrichment.get('asn', '')
-                isp = enrichment.get('isp', '')[:30]
-                org = enrichment.get('org', '')[:30]
-                proxy_type = format_proxy_type(enrichment)
-
-                # Write formatted line
-                f.write(f"{proxy} | {country:2} | {city:20} | {asn:10} | {isp:30} | {org:30} | {proxy_type:15} | {response_ms}ms\n")
-
-    def test_proxy_file(self, filepath: str,
-                        max_workers: int = 20) -> Dict[str, Any]:
-        """
-        Load and test proxies from a file.
-        """
-        from .utils import load_proxies_from_file
-
-        proxies = load_proxies_from_file(filepath)
-
-        if not proxies:
-            print(f"{Color.red('Error:')} No proxies found in {filepath}")
-            return {'all': [], 'valid': [], 'working': [], 'stats': {
-                'total': 0, 'valid': 0, 'working': 0, 'failed': 0
-            }}
-
-        print(f"Loaded {len(proxies)} proxies from {filepath}")
-        return self.validate_proxies(proxies, max_workers=max_workers)
+# Convenience function for backwards compatibility
+def validate_proxy(proxy: str, timeout: int = 5) -> Dict:
+    """Validate a single proxy. DEPRECATED."""
+    validator = ProxyValidator({'timeout': timeout})
+    return validator.validate_proxy(proxy)
