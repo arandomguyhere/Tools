@@ -199,6 +199,27 @@
             color: var(--warning);
         }
 
+        .latency-fast {
+            color: var(--success);
+        }
+
+        .latency-medium {
+            color: var(--warning);
+        }
+
+        .latency-slow {
+            color: var(--error);
+        }
+
+        .asn-cell {
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
         .copy-btn {
             background: transparent;
             border: none;
@@ -367,7 +388,7 @@
                 Refresh
             </button>
             <div class="search-box">
-                <input type="text" id="searchInput" placeholder="Filter proxies (e.g., 192.168 or :1080)" oninput="filterProxies()">
+                <input type="text" id="searchInput" placeholder="Filter by IP, country, ASN, org..." oninput="filterProxies()">
             </div>
         </div>
 
@@ -405,35 +426,41 @@
         let currentPage = 1;
         const perPage = 50;
 
+        const RESULTS_URL = 'https://raw.githubusercontent.com/arandomguyhere/Tools/main/socks5-scanner/proxies/results.json';
         const PROXY_URL = 'https://raw.githubusercontent.com/arandomguyhere/Tools/main/socks5-scanner/proxies/proxies_working.txt';
-        const VALID_URL = 'https://raw.githubusercontent.com/arandomguyhere/Tools/main/socks5-scanner/proxies/proxies_valid.txt';
 
         async function loadProxies() {
             try {
-                const [workingRes, validRes] = await Promise.all([
-                    fetch(PROXY_URL),
-                    fetch(VALID_URL)
-                ]);
+                // Try to load rich JSON data first
+                const jsonRes = await fetch(RESULTS_URL);
+                if (jsonRes.ok) {
+                    const data = await jsonRes.json();
+                    allProxies = data.proxies.map(p => ({
+                        address: p.proxy,
+                        status: 'working',
+                        country: p.geo?.country_code || '',
+                        city: p.geo?.city || '',
+                        asn: p.geo?.asn || '',
+                        org: p.geo?.org || p.geo?.isp || '',
+                        latency: p.latency_ms ? Math.round(p.latency_ms) : null
+                    }));
+                    filteredProxies = [...allProxies];
+                    updateStats(data.stats.working, data.stats.total, data.timestamp);
+                    renderTable();
+                    return;
+                }
+            } catch (e) {
+                console.log('JSON load failed, falling back to text:', e);
+            }
 
-                const workingText = await workingRes.text();
-                const validText = await validRes.text();
-
-                const working = workingText.trim().split('\n').filter(p => p && !p.startsWith('#'));
-                const valid = validText.trim().split('\n').filter(p => p && !p.startsWith('#'));
-
-                // Combine and dedupe
-                const workingSet = new Set(working);
-                allProxies = working.map(p => ({ address: p, status: 'working' }));
-
-                valid.forEach(p => {
-                    if (!workingSet.has(p)) {
-                        allProxies.push({ address: p, status: 'valid' });
-                    }
-                });
-
+            // Fallback to text file
+            try {
+                const textRes = await fetch(PROXY_URL);
+                const text = await textRes.text();
+                const proxies = text.trim().split('\n').filter(p => p && !p.startsWith('#'));
+                allProxies = proxies.map(p => ({ address: p, status: 'working' }));
                 filteredProxies = [...allProxies];
-
-                updateStats(working.length, allProxies.length);
+                updateStats(proxies.length, proxies.length);
                 renderTable();
             } catch (error) {
                 document.getElementById('proxyTable').innerHTML = `
@@ -467,6 +494,13 @@
             document.getElementById('lastUpdate').textContent = 'Recent';
         }
 
+        // Country code to flag emoji
+        function countryFlag(code) {
+            if (!code || code.length !== 2) return '';
+            const offset = 127397;
+            return String.fromCodePoint(...[...code.toUpperCase()].map(c => c.charCodeAt(0) + offset));
+        }
+
         function renderTable() {
             const start = (currentPage - 1) * perPage;
             const end = start + perPage;
@@ -479,7 +513,9 @@
                         <tr>
                             <th>#</th>
                             <th>Proxy Address</th>
-                            <th>Status</th>
+                            <th>Country</th>
+                            <th>ASN / Org</th>
+                            <th>Latency</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -487,14 +523,19 @@
             `;
 
             pageProxies.forEach((proxy, i) => {
-                const statusClass = proxy.status === 'working' ? 'status-working' : 'status-valid';
-                const statusText = proxy.status === 'working' ? 'Working' : 'Valid';
+                const flag = countryFlag(proxy.country);
+                const location = proxy.city ? `${proxy.city}, ${proxy.country}` : proxy.country || '-';
+                const asnOrg = proxy.asn ? `${proxy.asn}` + (proxy.org ? ` (${proxy.org.substring(0, 25)}${proxy.org.length > 25 ? '...' : ''})` : '') : (proxy.org || '-');
+                const latency = proxy.latency ? `${proxy.latency}ms` : '-';
+                const latencyClass = proxy.latency ? (proxy.latency < 200 ? 'latency-fast' : proxy.latency < 500 ? 'latency-medium' : 'latency-slow') : '';
 
                 html += `
                     <tr>
                         <td>${start + i + 1}</td>
                         <td class="proxy-address">${proxy.address}</td>
-                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                        <td title="${location}">${flag} ${proxy.country || '-'}</td>
+                        <td class="asn-cell" title="${proxy.org || ''}">${asnOrg}</td>
+                        <td class="${latencyClass}">${latency}</td>
                         <td>
                             <button class="copy-btn" onclick="copyProxy('${proxy.address}')" title="Copy">
                                 <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
@@ -535,7 +576,13 @@
 
         function filterProxies() {
             const query = document.getElementById('searchInput').value.toLowerCase();
-            filteredProxies = allProxies.filter(p => p.address.toLowerCase().includes(query));
+            filteredProxies = allProxies.filter(p =>
+                p.address.toLowerCase().includes(query) ||
+                (p.country && p.country.toLowerCase().includes(query)) ||
+                (p.city && p.city.toLowerCase().includes(query)) ||
+                (p.asn && p.asn.toLowerCase().includes(query)) ||
+                (p.org && p.org.toLowerCase().includes(query))
+            );
             currentPage = 1;
             renderTable();
         }
