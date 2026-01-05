@@ -8,7 +8,7 @@ Features:
 - SOCKS5 protocol validation
 - HTTP connectivity testing
 - Async mode for high-performance scanning
-- Geolocation lookup
+- IP enrichment (ASN, geolocation, ownership)
 - SQLite database for tracking source quality
 """
 
@@ -16,7 +16,8 @@ from .scanner import Socks5Scanner, quick_scan
 from .validator import ProxyValidator
 from .utils import (
     Color, parse_proxy, validate_ip, validate_port,
-    GeoLocator, get_geo_info, format_geo_info
+    IPEnricher, GeoLocator, get_geo_info, format_geo_info,
+    format_asn_info, format_ownership_info, format_proxy_type
 )
 
 # Hunter components (GitHub discovery)
@@ -33,7 +34,7 @@ try:
 except ImportError:
     ASYNC_AVAILABLE = False
 
-__version__ = "1.2.0"
+__version__ = "1.3.0"
 __all__ = [
     "Socks5Scanner",
     "ProxyValidator",
@@ -42,9 +43,13 @@ __all__ = [
     "parse_proxy",
     "validate_ip",
     "validate_port",
+    "IPEnricher",
     "GeoLocator",
     "get_geo_info",
     "format_geo_info",
+    "format_asn_info",
+    "format_ownership_info",
+    "format_proxy_type",
     "ASYNC_AVAILABLE",
     "HUNTER_AVAILABLE",
 ]

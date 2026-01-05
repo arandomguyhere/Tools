@@ -1,5 +1,7 @@
 """
 Proxy Validator - Tests SOCKS5 proxy connectivity and functionality.
+
+Includes IP enrichment for ASN, geolocation, and ownership data.
 """
 
 import concurrent.futures
@@ -13,7 +15,8 @@ import requests
 
 from .utils import (
     Color, parse_proxy, format_proxy, save_json, save_proxies_to_file,
-    progress_bar, format_time, Timer
+    progress_bar, format_time, Timer, IPEnricher, format_asn_info,
+    format_ownership_info, format_geo_info, format_proxy_type
 )
 
 
@@ -28,6 +31,7 @@ class ProxyValidator:
             "http://icanhazip.com",
         ])
         self.verify_ssl = self.config.get('verify_ssl', False)
+        self.enricher = IPEnricher() if self.config.get('enrich', False) else None
 
     def test_socks5_handshake(self, ip: str, port: int,
                                timeout: Optional[int] = None) -> Tuple[bool, str]:
@@ -264,9 +268,16 @@ class ProxyValidator:
 
     def validate_proxies(self, proxies: List[str],
                          max_workers: int = 20,
-                         show_progress: bool = True) -> Dict[str, Any]:
+                         show_progress: bool = True,
+                         enrich: bool = False) -> Dict[str, Any]:
         """
         Validate multiple proxies concurrently.
+
+        Args:
+            proxies: List of proxy strings (ip:port)
+            max_workers: Concurrent validation threads
+            show_progress: Display progress bar
+            enrich: Enable IP enrichment (ASN, geo, ownership)
 
         Returns a dict with all results and statistics.
         """
@@ -326,12 +337,65 @@ class ProxyValidator:
             elapsed = time.time() - start_time
             print(f"Completed in {format_time(elapsed)}")
 
+        # Enrich valid proxies with ASN/geo/ownership data
+        if enrich and results['valid']:
+            self._enrich_results(results, show_progress)
+
         return results
+
+    def _enrich_results(self, results: Dict, show_progress: bool = True):
+        """Enrich valid proxy results with ASN, geo, and ownership data."""
+        valid_proxies = results.get('valid', [])
+
+        if not valid_proxies:
+            return
+
+        if show_progress:
+            print(f"\n{Color.cyan('Enriching')} {len(valid_proxies)} valid proxies...")
+
+        enricher = self.enricher or IPEnricher()
+
+        # Extract unique IPs
+        ips = []
+        for proxy_result in valid_proxies:
+            parsed = parse_proxy(proxy_result['proxy'])
+            if parsed:
+                ips.append(parsed[0])
+
+        # Batch enrich
+        enrichment_data = enricher.enrich_batch(
+            list(set(ips)),
+            max_workers=10,
+            show_progress=show_progress,
+            rate_limit_delay=0.05
+        )
+
+        # Attach enrichment to results
+        for proxy_result in valid_proxies:
+            parsed = parse_proxy(proxy_result['proxy'])
+            if parsed:
+                ip = parsed[0]
+                if ip in enrichment_data:
+                    proxy_result['enrichment'] = enrichment_data[ip]
+
+        # Also enrich working proxies (they're a subset of valid)
+        for proxy_result in results.get('working', []):
+            parsed = parse_proxy(proxy_result['proxy'])
+            if parsed:
+                ip = parsed[0]
+                if ip in enrichment_data:
+                    proxy_result['enrichment'] = enrichment_data[ip]
+
+        if show_progress:
+            enriched_count = sum(1 for p in valid_proxies if 'enrichment' in p)
+            print(f"  Enriched {enriched_count}/{len(valid_proxies)} proxies")
 
     def save_results(self, results: Dict, output_dir: str = "./results",
                      timestamp: Optional[str] = None) -> Dict[str, str]:
         """
         Save validation results to files.
+
+        Includes enriched data (ASN, geo, ownership) if available.
 
         Returns dict of saved file paths.
         """
@@ -361,11 +425,41 @@ class ProxyValidator:
             if save_proxies_to_file(working_proxies, txt_path):
                 saved_files['working_txt'] = txt_path
 
+        # Save enriched data as detailed CSV-like format
+        enriched_proxies = [r for r in results.get('working', []) if 'enrichment' in r]
+        if enriched_proxies:
+            detailed_path = os.path.join(output_dir, f"proxies_detailed_{timestamp}.txt")
+            self._save_detailed_results(enriched_proxies, detailed_path)
+            saved_files['detailed_txt'] = detailed_path
+
         print(f"\n{Color.green('Results saved:')}")
         for key, path in saved_files.items():
             print(f"  - {path}")
 
         return saved_files
+
+    def _save_detailed_results(self, proxies: List[Dict], filepath: str):
+        """Save detailed proxy results with enrichment data."""
+        with open(filepath, 'w', encoding='utf-8') as f:
+            # Header
+            f.write("# SOCKS5 Proxy List with ASN/Geo/Ownership Data\n")
+            f.write("# Format: proxy | country | city | asn | isp | org | type | response_ms\n")
+            f.write("#" + "=" * 100 + "\n\n")
+
+            for proxy_data in proxies:
+                proxy = proxy_data['proxy']
+                enrichment = proxy_data.get('enrichment', {})
+                response_ms = proxy_data.get('response_time_ms', '?')
+
+                country = enrichment.get('country_code') or enrichment.get('country', '')[:2]
+                city = enrichment.get('city', '')[:20]
+                asn = enrichment.get('asn', '')
+                isp = enrichment.get('isp', '')[:30]
+                org = enrichment.get('org', '')[:30]
+                proxy_type = format_proxy_type(enrichment)
+
+                # Write formatted line
+                f.write(f"{proxy} | {country:2} | {city:20} | {asn:10} | {isp:30} | {org:30} | {proxy_type:15} | {response_ms}ms\n")
 
     def test_proxy_file(self, filepath: str,
                         max_workers: int = 20) -> Dict[str, Any]:

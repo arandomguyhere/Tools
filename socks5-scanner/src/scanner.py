@@ -177,7 +177,8 @@ class Socks5Scanner:
                       output_dir: str = './results',
                       validate: bool = True,
                       proxy_file: Optional[str] = None,
-                      use_hunter: bool = False) -> Dict:
+                      use_hunter: bool = False,
+                      enrich: bool = False) -> Dict:
         """
         Run a complete proxy scan and validation.
 
@@ -188,6 +189,7 @@ class Socks5Scanner:
             validate: Whether to validate proxies
             proxy_file: Path to proxy file (for 'file' mode)
             use_hunter: Enable GitHub repository hunting
+            enrich: Enable IP enrichment (ASN, geo, ownership)
 
         Returns:
             Dictionary with scan results
@@ -201,6 +203,8 @@ class Socks5Scanner:
         mode_str = mode
         if use_hunter:
             mode_str += " + hunt"
+        if enrich:
+            mode_str += " + enrich"
         print(f"Mode: {mode_str} | Workers: {max_workers}")
         print(f"{'='*60}")
 
@@ -237,14 +241,15 @@ class Socks5Scanner:
             results = self.validator.validate_proxies(
                 proxy_list,
                 max_workers=max_workers,
-                show_progress=True
+                show_progress=True,
+                enrich=enrich
             )
 
             # Save results
             self.validator.save_results(results, output_dir=output_dir, timestamp=timestamp)
 
             # Print statistics
-            self._print_stats(results)
+            self._print_stats(results, show_enrichment=enrich)
 
         return {
             'proxies': proxy_list,
@@ -254,8 +259,10 @@ class Socks5Scanner:
             }
         }
 
-    def _print_stats(self, results: Dict):
+    def _print_stats(self, results: Dict, show_enrichment: bool = False):
         """Print scan statistics."""
+        from .utils import format_geo_info, format_asn_info, format_ownership_info, format_proxy_type
+
         stats = results.get('stats', {})
 
         print(f"\n{'='*60}")
@@ -274,8 +281,19 @@ class Socks5Scanner:
             for proxy_info in working[:5]:
                 proxy = proxy_info['proxy']
                 response_time = proxy_info.get('response_time_ms', '?')
-                ext_ip = proxy_info.get('external_ip', 'N/A')
-                print(f"  • {proxy} ({response_time}ms) - IP: {ext_ip}")
+
+                # Show enrichment data if available
+                enrichment = proxy_info.get('enrichment', {})
+                if enrichment and show_enrichment:
+                    geo = format_geo_info(enrichment)
+                    asn = format_asn_info(enrichment)
+                    ptype = format_proxy_type(enrichment)
+                    print(f"  • {proxy} ({response_time}ms)")
+                    print(f"    Location: {geo} | ASN: {asn}")
+                    print(f"    Type: {ptype} | ISP: {enrichment.get('isp', 'N/A')[:40]}")
+                else:
+                    ext_ip = proxy_info.get('external_ip', 'N/A')
+                    print(f"  • {proxy} ({response_time}ms) - IP: {ext_ip}")
 
             if len(working) > 5:
                 print(f"  ... and {len(working) - 5} more")
