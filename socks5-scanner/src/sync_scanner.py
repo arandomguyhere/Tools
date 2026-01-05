@@ -24,6 +24,19 @@ from .core import (
     Socks5, ScannerError
 )
 
+# Optional advanced modules
+try:
+    from .geoip import get_geoip, GeoIPResult
+    HAS_GEOIP = True
+except ImportError:
+    HAS_GEOIP = False
+
+try:
+    from .anonymity import AnonymityChecker
+    HAS_ANONYMITY = True
+except ImportError:
+    HAS_ANONYMITY = False
+
 logger = logging.getLogger(__name__)
 
 
@@ -37,9 +50,22 @@ class SyncScanner:
         results = scanner.scan_many(["1.2.3.4:1080", "5.6.7.8:1080"])
     """
 
-    def __init__(self, config: Optional[ScanConfig] = None):
+    def __init__(self, config: Optional[ScanConfig] = None, enable_geoip: bool = False):
         self.config = config or ScanConfig()
         self._session: Optional[requests.Session] = None
+        self._geoip = None
+        self._anonymity_checker = None
+
+        # Initialize optional modules
+        if enable_geoip and HAS_GEOIP:
+            try:
+                self._geoip = get_geoip()
+                logger.info("GeoIP enrichment enabled")
+            except Exception as e:
+                logger.warning(f"Failed to initialize GeoIP: {e}")
+
+        if HAS_ANONYMITY:
+            self._anonymity_checker = AnonymityChecker(timeout=self.config.http_timeout)
 
     @property
     def session(self) -> requests.Session:
@@ -113,6 +139,10 @@ class SyncScanner:
                 # Stage 4: HTTP Test (separate connection via requests)
                 if result.tunnel_works:
                     self._http_test(proxy, result)
+
+                    # Stage 5: GeoIP Enrichment (if enabled and we have external IP)
+                    if self._geoip and result.external_ip:
+                        self._enrich_geoip(result)
 
                 # Success - no retry needed
                 break
@@ -470,6 +500,36 @@ class SyncScanner:
             result.error_category = ErrorCategory.HTTP_ERROR
             result.error_stage = "http"
             return False
+
+    # =========================================================================
+    # Stage 5: GeoIP Enrichment
+    # =========================================================================
+
+    def _enrich_geoip(self, result: ProxyResult):
+        """Enrich result with GeoIP data for the external IP."""
+        if not self._geoip or not result.external_ip:
+            return
+
+        try:
+            geo_result = self._geoip.lookup(result.external_ip)
+
+            # Populate GeoInfo on the result
+            result.geo = GeoInfo(
+                country=geo_result.country,
+                country_code=geo_result.country_code,
+                city=geo_result.city,
+                region=geo_result.region,
+                latitude=geo_result.latitude,
+                longitude=geo_result.longitude,
+                timezone=geo_result.timezone,
+                asn=geo_result.asn,
+                asn_org=geo_result.asn_org
+            )
+
+            logger.debug(f"GeoIP enriched {result.external_ip}: {geo_result.location_str}, {geo_result.asn_str}")
+
+        except Exception as e:
+            logger.debug(f"GeoIP enrichment failed for {result.external_ip}: {e}")
 
     # =========================================================================
     # Utility Methods
