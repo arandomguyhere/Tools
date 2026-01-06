@@ -15,7 +15,7 @@ on:
       concurrency:
         description: 'Concurrency level'
         required: false
-        default: '100'
+        default: '500'
 
 jobs:
   scan:
@@ -44,7 +44,7 @@ jobs:
         working-directory: socks5-scanner
         run: |
           python -m pip install --upgrade pip
-          pip install aiohttp requests pyyaml
+          pip install aiohttp requests pyyaml uvloop
 
       - name: Create output directories
         working-directory: socks5-scanner
@@ -53,48 +53,104 @@ jobs:
       - name: Run proxy scan
         working-directory: socks5-scanner
         continue-on-error: true
+        timeout-minutes: 45
         run: |
           python -c "
           import asyncio
           import json
           import os
+          import sys
           from datetime import datetime
+
+          # Use uvloop for faster async (20-30% speedup)
+          try:
+              import uvloop
+              asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+              print('Using uvloop for faster async')
+          except ImportError:
+              print('uvloop not available, using default event loop')
 
           from src.async_scanner_v2 import AsyncScanner
           from src.core import ScanConfig
           from src.scanner import Socks5Scanner
 
+          async def fetch_source(session, url, proxies_set):
+              \"\"\"Fetch a single source and add to proxy set.\"\"\"
+              try:
+                  async with session.get(url, timeout=aiohttp.ClientTimeout(total=20), ssl=False) as resp:
+                      if resp.status == 200:
+                          text = await resp.text()
+                          count_before = len(proxies_set)
+                          for line in text.strip().split('\n'):
+                              line = line.strip()
+                              if ':' in line and len(line) < 50:
+                                  parts = line.split()
+                                  if parts:
+                                      candidate = parts[0]
+                                      if ':' in candidate:
+                                          proxies_set.add(candidate)
+                          added = len(proxies_set) - count_before
+                          return (url[:40], added, None)
+              except Exception as e:
+                  return (url[:40], 0, str(e)[:30])
+              return (url[:40], 0, 'no data')
+
+          async def batch_geoip(session, ips):
+              \"\"\"Batch GeoIP lookup - 100 IPs per request (much faster).\"\"\"
+              results = {}
+              try:
+                  # ip-api.com batch endpoint: POST up to 100 IPs
+                  async with session.post(
+                      'http://ip-api.com/batch?fields=status,country,countryCode,city,lat,lon,isp,org,as',
+                      json=ips[:100],
+                      timeout=aiohttp.ClientTimeout(total=10)
+                  ) as resp:
+                      if resp.status == 200:
+                          data = await resp.json()
+                          for item in data:
+                              if item.get('status') == 'success':
+                                  ip = item.get('query')
+                                  results[ip] = {
+                                      'country': item.get('country'),
+                                      'country_code': item.get('countryCode'),
+                                      'city': item.get('city'),
+                                      'lat': item.get('lat'),
+                                      'lon': item.get('lon'),
+                                      'isp': item.get('isp'),
+                                      'org': item.get('org'),
+                                      'asn': item.get('as', '').split()[0] if item.get('as') else None,
+                                      'asn_org': ' '.join(item.get('as', '').split()[1:]) if item.get('as') else None,
+                                  }
+              except Exception as e:
+                  print(f'  Batch GeoIP error: {e}')
+              return results
+
           async def main():
+              import aiohttp
+
+              concurrency = int(os.environ.get('CONCURRENCY', '500'))
               config = ScanConfig(
-                  connect_timeout=5.0,
-                  max_concurrent=int(os.environ.get('CONCURRENCY', '100'))
+                  connect_timeout=3.0,  # Reduced from 5s
+                  read_timeout=3.0,
+                  max_concurrent=concurrency
               )
 
-              # Use all 20+ sources from scanner module
               sources = Socks5Scanner.DEFAULT_SOURCES
-              print(f'Using {len(sources)} proxy sources')
+              print(f'Using {len(sources)} proxy sources with concurrency={concurrency}')
 
-              # Fetch proxies
-              import aiohttp
+              # OPTIMIZATION 1: Parallel source fetching
+              print('Fetching sources in parallel...')
               proxies = set()
               async with aiohttp.ClientSession() as session:
-                  for url in sources:
-                      try:
-                          async with session.get(url, timeout=aiohttp.ClientTimeout(total=30), ssl=False) as resp:
-                              if resp.status == 200:
-                                  text = await resp.text()
-                                  for line in text.strip().split('\n'):
-                                      line = line.strip()
-                                      if ':' in line and len(line) < 50:
-                                          # Extract IP:port pattern
-                                          parts = line.split()
-                                          if parts:
-                                              candidate = parts[0]
-                                              if ':' in candidate:
-                                                  proxies.add(candidate)
-                          print(f'  {url[:50]}... -> {len(proxies)} total')
-                      except Exception as e:
-                          print(f'  Failed: {url[:50]}... ({e})')
+                  tasks = [fetch_source(session, url, proxies) for url in sources]
+                  results = await asyncio.gather(*tasks, return_exceptions=True)
+                  for r in results:
+                      if isinstance(r, tuple):
+                          url, added, err = r
+                          if err:
+                              print(f'  {url}... failed: {err}')
+                          elif added > 0:
+                              print(f'  {url}... +{added}')
 
               print(f'Collected {len(proxies)} unique proxies')
 
@@ -102,57 +158,59 @@ jobs:
                   print('No proxies found')
                   return
 
-              # Scan
+              # Scan with higher concurrency
+              print(f'Scanning {len(proxies)} proxies with {concurrency} concurrent...')
+              start_time = datetime.now()
+
               async with AsyncScanner(config) as scanner:
                   results = await scanner.scan_many(list(proxies))
 
-              # Save results
+              scan_time = (datetime.now() - start_time).total_seconds()
+              print(f'Scan completed in {scan_time:.1f}s ({len(proxies)/scan_time:.0f} proxies/sec)')
+
               working = results.get_working()
               valid = [r for r in results.results if r.socks5_valid]
 
               print(f'Results: {results.total} scanned, {len(valid)} valid, {len(working)} working')
 
-              # Enrich with GeoIP data using a new session
-              print('Enriching with GeoIP data...')
+              # OPTIMIZATION 2: Batch GeoIP (100 IPs per request instead of 1)
+              print('Enriching with GeoIP data (batch mode)...')
               enriched = []
-              otx_key = os.environ.get('OTX_API_KEY', '')
+              geo_limit = min(len(working), 500)
+
               async with aiohttp.ClientSession() as geo_session:
-                  for i, r in enumerate(working[:500]):  # Limit to 500 to avoid rate limits
+                  # Extract IPs for batch lookup
+                  ips_to_lookup = []
+                  for r in working[:geo_limit]:
+                      ip = r.host or r.proxy.split(':')[0]
+                      ips_to_lookup.append(ip)
+
+                  # Batch lookup in chunks of 100
+                  all_geo = {}
+                  for i in range(0, len(ips_to_lookup), 100):
+                      batch = ips_to_lookup[i:i+100]
+                      geo_results = await batch_geoip(geo_session, batch)
+                      all_geo.update(geo_results)
+                      print(f'  GeoIP batch {i//100 + 1}/{(len(ips_to_lookup)+99)//100}: {len(geo_results)} results')
+                      await asyncio.sleep(0.5)  # Rate limit between batches
+
+                  # Build enriched list
+                  otx_key = os.environ.get('OTX_API_KEY', '')
+                  for i, r in enumerate(working[:geo_limit]):
                       proxy_data = r.to_dict()
                       ip = r.host or r.proxy.split(':')[0]
 
-                      # Try to get geo data from free API (with lat/lon for map)
-                      try:
-                          async with geo_session.get(
-                              f'http://ip-api.com/json/{ip}?fields=status,country,countryCode,city,lat,lon,isp,org,as',
-                              timeout=aiohttp.ClientTimeout(total=5)
-                          ) as geo_resp:
-                              if geo_resp.status == 200:
-                                  geo = await geo_resp.json()
-                                  if geo.get('status') == 'success':
-                                      proxy_data['geo'] = {
-                                          'country': geo.get('country'),
-                                          'country_code': geo.get('countryCode'),
-                                          'city': geo.get('city'),
-                                          'lat': geo.get('lat'),
-                                          'lon': geo.get('lon'),
-                                          'isp': geo.get('isp'),
-                                          'org': geo.get('org'),
-                                          'asn': geo.get('as', '').split()[0] if geo.get('as') else None,
-                                          'asn_org': ' '.join(geo.get('as', '').split()[1:]) if geo.get('as') else None,
-                                      }
-                          await asyncio.sleep(0.15)  # Rate limit: 45/min
-                      except Exception as e:
-                          pass
+                      if ip in all_geo:
+                          proxy_data['geo'] = all_geo[ip]
 
-                      # Optional: OTX threat intelligence (if API key provided)
-                      if otx_key and i < 100:  # Limit OTX lookups
+                      # Optional OTX (only first 50 to save time)
+                      if otx_key and i < 50:
                           try:
                               headers = {'X-OTX-API-KEY': otx_key}
                               async with geo_session.get(
                                   f'https://otx.alienvault.com/api/v1/indicators/IPv4/{ip}/general',
                                   headers=headers,
-                                  timeout=aiohttp.ClientTimeout(total=5)
+                                  timeout=aiohttp.ClientTimeout(total=3)
                               ) as otx_resp:
                                   if otx_resp.status == 200:
                                       otx = await otx_resp.json()
@@ -160,33 +218,27 @@ jobs:
                                       proxy_data['threat'] = {
                                           'score': min(pulse_count, 10),
                                           'pulses': pulse_count,
-                                          'tags': otx.get('pulse_info', {}).get('pulses', [])[:3]
                                       }
-                              await asyncio.sleep(0.1)
                           except:
                               pass
 
                       enriched.append(proxy_data)
-                      if (i + 1) % 50 == 0:
-                          print(f'  GeoIP: {i + 1}/500 enriched')
 
-              # Add remaining without geo (if > 500)
-              for r in working[500:]:
+              # Add remaining without geo
+              for r in working[geo_limit:]:
                   enriched.append(r.to_dict())
 
               print(f'Enriched {len([e for e in enriched if e.get(\"geo\")])} proxies with geo data')
 
-              # Save working proxies
+              # Save results
               with open('proxies/proxies_working.txt', 'w') as f:
                   for r in working:
                       f.write(f'{r.proxy}\n')
 
-              # Save valid proxies
               with open('proxies/proxies_valid.txt', 'w') as f:
                   for r in valid:
                       f.write(f'{r.proxy}\n')
 
-              # Save full results as JSON with geo data
               with open('proxies/results.json', 'w') as f:
                   json.dump({
                       'timestamp': datetime.utcnow().isoformat() + 'Z',
@@ -194,14 +246,17 @@ jobs:
                           'total': results.total,
                           'valid': len(valid),
                           'working': len(working),
+                          'scan_time_sec': scan_time,
                       },
                       'proxies': enriched
                   }, f, indent=2, default=str)
 
+              print(f'Done! Total time: {(datetime.now() - start_time).total_seconds():.1f}s')
+
           asyncio.run(main())
           "
         env:
-          CONCURRENCY: ${{ github.event.inputs.concurrency || '100' }}
+          CONCURRENCY: ${{ github.event.inputs.concurrency || '500' }}
           OTX_API_KEY: ${{ secrets.OTX_API_KEY }}
 
       - name: Generate summary
@@ -214,11 +269,13 @@ jobs:
             TOTAL=$(python -c "import json; d=json.load(open('proxies/results.json')); print(d.get('stats',{}).get('total', 0))" 2>/dev/null || echo "0")
             VALID=$(python -c "import json; d=json.load(open('proxies/results.json')); print(d.get('stats',{}).get('valid', 0))" 2>/dev/null || echo "0")
             WORKING=$(python -c "import json; d=json.load(open('proxies/results.json')); print(d.get('stats',{}).get('working', 0))" 2>/dev/null || echo "0")
+            TIME=$(python -c "import json; d=json.load(open('proxies/results.json')); print(f\"{d.get('stats',{}).get('scan_time_sec', 0):.0f}s\")" 2>/dev/null || echo "?")
             echo "| Metric | Count |" >> $GITHUB_STEP_SUMMARY
             echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
             echo "| Total Scanned | $TOTAL |" >> $GITHUB_STEP_SUMMARY
             echo "| SOCKS5 Valid | $VALID |" >> $GITHUB_STEP_SUMMARY
             echo "| Fully Working | $WORKING |" >> $GITHUB_STEP_SUMMARY
+            echo "| Scan Time | $TIME |" >> $GITHUB_STEP_SUMMARY
           else
             echo "No results file found" >> $GITHUB_STEP_SUMMARY
           fi
