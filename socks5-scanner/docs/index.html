@@ -726,11 +726,28 @@
         }
 
         function getThreatBadge(threat) {
-            if (!threat) return '<span class="threat-badge threat-unknown">-</span>';
+            if (!threat) return '<span class="threat-badge threat-unknown" title="Not checked">-</span>';
             const score = threat.score || 0;
-            if (score === 0) return '<span class="threat-badge threat-clean">Clean</span>';
-            if (score < 3) return '<span class="threat-badge threat-suspicious">Low</span>';
-            return '<span class="threat-badge threat-malicious">Risk</span>';
+            const sources = threat.sources || [];
+            const pulses = threat.pulses || 0;
+
+            // Build tooltip with sources
+            let tooltip = '';
+            if (sources.length > 0) {
+                tooltip = 'Flagged by: ' + sources.map(s => s.toUpperCase()).join(', ');
+            }
+            if (pulses > 0) {
+                tooltip += (tooltip ? ' | ' : '') + 'OTX: ' + pulses + ' pulse(s)';
+            }
+            if (!tooltip && score === 0) {
+                tooltip = 'No threats detected';
+            }
+
+            const titleAttr = tooltip ? ` title="${escapeHtml(tooltip)}"` : '';
+
+            if (score === 0) return `<span class="threat-badge threat-clean"${titleAttr}>Clean</span>`;
+            if (score < 5) return `<span class="threat-badge threat-suspicious"${titleAttr}>Low</span>`;
+            return `<span class="threat-badge threat-malicious"${titleAttr}>Risk</span>`;
         }
 
         function renderTable() {
