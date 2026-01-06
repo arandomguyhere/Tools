@@ -115,15 +115,16 @@ jobs:
               # Enrich with GeoIP data using a new session
               print('Enriching with GeoIP data...')
               enriched = []
+              otx_key = os.environ.get('OTX_API_KEY', '')
               async with aiohttp.ClientSession() as geo_session:
                   for i, r in enumerate(working[:500]):  # Limit to 500 to avoid rate limits
                       proxy_data = r.to_dict()
                       ip = r.host or r.proxy.split(':')[0]
 
-                      # Try to get geo data from free API
+                      # Try to get geo data from free API (with lat/lon for map)
                       try:
                           async with geo_session.get(
-                              f'http://ip-api.com/json/{ip}?fields=status,country,countryCode,city,isp,org,as',
+                              f'http://ip-api.com/json/{ip}?fields=status,country,countryCode,city,lat,lon,isp,org,as',
                               timeout=aiohttp.ClientTimeout(total=5)
                           ) as geo_resp:
                               if geo_resp.status == 200:
@@ -133,6 +134,8 @@ jobs:
                                           'country': geo.get('country'),
                                           'country_code': geo.get('countryCode'),
                                           'city': geo.get('city'),
+                                          'lat': geo.get('lat'),
+                                          'lon': geo.get('lon'),
                                           'isp': geo.get('isp'),
                                           'org': geo.get('org'),
                                           'asn': geo.get('as', '').split()[0] if geo.get('as') else None,
@@ -141,6 +144,27 @@ jobs:
                           await asyncio.sleep(0.15)  # Rate limit: 45/min
                       except Exception as e:
                           pass
+
+                      # Optional: OTX threat intelligence (if API key provided)
+                      if otx_key and i < 100:  # Limit OTX lookups
+                          try:
+                              headers = {'X-OTX-API-KEY': otx_key}
+                              async with geo_session.get(
+                                  f'https://otx.alienvault.com/api/v1/indicators/IPv4/{ip}/general',
+                                  headers=headers,
+                                  timeout=aiohttp.ClientTimeout(total=5)
+                              ) as otx_resp:
+                                  if otx_resp.status == 200:
+                                      otx = await otx_resp.json()
+                                      pulse_count = otx.get('pulse_info', {}).get('count', 0)
+                                      proxy_data['threat'] = {
+                                          'score': min(pulse_count, 10),
+                                          'pulses': pulse_count,
+                                          'tags': otx.get('pulse_info', {}).get('pulses', [])[:3]
+                                      }
+                              await asyncio.sleep(0.1)
+                          except:
+                              pass
 
                       enriched.append(proxy_data)
                       if (i + 1) % 50 == 0:
@@ -178,6 +202,7 @@ jobs:
           "
         env:
           CONCURRENCY: ${{ github.event.inputs.concurrency || '100' }}
+          OTX_API_KEY: ${{ secrets.OTX_API_KEY }}
 
       - name: Generate summary
         working-directory: socks5-scanner
