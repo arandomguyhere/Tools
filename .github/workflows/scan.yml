@@ -101,11 +101,12 @@ jobs:
               \"\"\"Batch GeoIP lookup - 100 IPs per request (much faster).\"\"\"
               results = {}
               try:
-                  # ip-api.com batch endpoint: POST up to 100 IPs
+                  # ip-api.com batch endpoint expects list of {"query": "IP"} objects
+                  batch_data = [{"query": ip, "fields": "status,query,country,countryCode,city,lat,lon,isp,org,as"} for ip in ips[:100]]
                   async with session.post(
-                      'http://ip-api.com/batch?fields=status,country,countryCode,city,lat,lon,isp,org,as',
-                      json=ips[:100],
-                      timeout=aiohttp.ClientTimeout(total=10)
+                      'http://ip-api.com/batch',
+                      json=batch_data,
+                      timeout=aiohttp.ClientTimeout(total=15)
                   ) as resp:
                       if resp.status == 200:
                           data = await resp.json()
@@ -123,6 +124,8 @@ jobs:
                                       'asn': item.get('as', '').split()[0] if item.get('as') else None,
                                       'asn_org': ' '.join(item.get('as', '').split()[1:]) if item.get('as') else None,
                                   }
+                      else:
+                          print(f'  Batch GeoIP HTTP {resp.status}')
               except Exception as e:
                   print(f'  Batch GeoIP error: {e}')
               return results
