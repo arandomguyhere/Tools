@@ -44,7 +44,7 @@ jobs:
         working-directory: socks5-scanner
         run: |
           python -m pip install --upgrade pip
-          pip install aiohttp requests pyyaml uvloop
+          pip install -r requirements.txt
 
       - name: Create output directories
         working-directory: socks5-scanner
@@ -132,7 +132,9 @@ jobs:
               return results
 
           async def main():
+              # Validate concurrency input (min: 10, max: 2000)
               concurrency = int(os.environ.get('CONCURRENCY', '500'))
+              concurrency = max(10, min(2000, concurrency))
               config = ScanConfig(
                   connect_timeout=3.0,  # Reduced from 5s
                   read_timeout=3.0,
