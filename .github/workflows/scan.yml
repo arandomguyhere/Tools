@@ -99,10 +99,10 @@ jobs:
 
           async def batch_geoip(session, ips):
               \"\"\"Batch GeoIP lookup - 100 IPs per request (much faster).\"\"\"
-              results = {}
+              results = dict()
               try:
-                  # ip-api.com batch endpoint expects list of {"query": "IP"} objects
-                  batch_data = [{"query": ip, "fields": "status,query,country,countryCode,city,lat,lon,isp,org,as"} for ip in ips[:100]]
+                  # ip-api.com batch endpoint expects list of query objects
+                  batch_data = [dict(query=ip, fields='status,query,country,countryCode,city,lat,lon,isp,org,as') for ip in ips[:100]]
                   async with session.post(
                       'http://ip-api.com/batch',
                       json=batch_data,
@@ -113,17 +113,18 @@ jobs:
                           for item in data:
                               if item.get('status') == 'success':
                                   ip = item.get('query')
-                                  results[ip] = {
-                                      'country': item.get('country'),
-                                      'country_code': item.get('countryCode'),
-                                      'city': item.get('city'),
-                                      'lat': item.get('lat'),
-                                      'lon': item.get('lon'),
-                                      'isp': item.get('isp'),
-                                      'org': item.get('org'),
-                                      'asn': item.get('as', '').split()[0] if item.get('as') else None,
-                                      'asn_org': ' '.join(item.get('as', '').split()[1:]) if item.get('as') else None,
-                                  }
+                                  as_field = item.get('as', '')
+                                  results[ip] = dict(
+                                      country=item.get('country'),
+                                      country_code=item.get('countryCode'),
+                                      city=item.get('city'),
+                                      lat=item.get('lat'),
+                                      lon=item.get('lon'),
+                                      isp=item.get('isp'),
+                                      org=item.get('org'),
+                                      asn=as_field.split()[0] if as_field else None,
+                                      asn_org=' '.join(as_field.split()[1:]) if as_field else None,
+                                  )
                       else:
                           print(f'  Batch GeoIP HTTP {resp.status}')
               except Exception as e:
