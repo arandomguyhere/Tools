@@ -1,9 +1,9 @@
-# SOCKS5 Proxy Scanner v2.0
+# SOCKS5 Proxy Scanner v2.1
 
 [![Scan Status](https://github.com/arandomguyhere/Tools/actions/workflows/scan.yml/badge.svg)](https://github.com/arandomguyhere/Tools/actions/workflows/scan.yml)
 [![GitHub Pages](https://github.com/arandomguyhere/Tools/actions/workflows/pages.yml/badge.svg)](https://arandomguyhere.github.io/Tools/socks5-scanner/)
 
-A production-ready, high-performance SOCKS5 proxy scanner with automated updates and web UI.
+A production-ready, high-performance SOCKS5 proxy scanner with automated updates, GeoIP enrichment, threat intelligence, and interactive web UI.
 
 ## Live Proxy List
 
@@ -52,15 +52,18 @@ proxies = requests.get("https://raw.githubusercontent.com/arandomguyhere/Tools/m
 | **Pipeline hooks** | Callbacks, filters, webhooks |
 
 ### Web UI Features
-- **List View** - Sortable table with all proxy data
-- **Map View** - Interactive world map with proxy locations
-- Country flags and city names
-- ASN and organization info
-- Latency with color coding (green/yellow/red)
-- Threat intelligence badges (via OTX)
-- Filter by IP, country, city, ASN, or org
-- Copy individual proxies or entire list
-- Download as file
+- **List View** - Paginated table with all proxy data
+- **Map View** - Interactive Leaflet map with proxy markers
+- **Country flags** - Emoji flags from country codes
+- **City names** - Geographic location display
+- **ASN/Org info** - Network and organization data
+- **Latency badges** - Color-coded (green < 200ms, yellow < 500ms, red > 500ms)
+- **Threat badges** - OTX threat intelligence (Clean/Low/Risk)
+- **Search filter** - Filter by IP, country, city, ASN, or org
+- **Copy buttons** - Copy individual proxy or entire list
+- **Download** - Export working proxies as text file
+- **XSS protection** - All user data properly escaped
+- **SRI integrity** - CDN resources verified with hashes
 
 ---
 
@@ -277,11 +280,21 @@ The scanner runs every 6 hours via GitHub Actions:
 ### CI/CD Optimizations
 The GitHub Actions workflow includes several optimizations:
 - **uvloop** - 20-30% faster async event loop
-- **Batch GeoIP** - 100 IPs per request (vs 1)
-- **Parallel source fetching** - All sources fetched concurrently
+- **Batch GeoIP** - 100 IPs per request (vs individual lookups)
+- **Parallel source fetching** - All 20+ sources fetched concurrently
 - **500 concurrent connections** - 5x default concurrency
+- **Efficient enrichment** - GeoIP and OTX lookups during result processing
 
-### Benchmarks
+### Real-World Benchmarks (GitHub Actions)
+| Metric | Result |
+|--------|--------|
+| Proxies Scanned | ~104,000 |
+| Working Found | ~900 |
+| Scan Time | ~11 minutes |
+| GeoIP Enriched | 500 proxies |
+| Threat Checked | 50 proxies |
+
+### Theoretical Benchmarks
 | Mode | Concurrency | 5000 proxies | 100K proxies |
 |------|-------------|--------------|--------------|
 | Sync | 50 threads | ~2-3 min | ~40 min |
@@ -328,16 +341,29 @@ socks5-scanner/
 
 ## Threat Intelligence (OTX)
 
-Optional AlienVault OTX integration for threat scoring:
+Integrated AlienVault OTX threat intelligence for proxy reputation scoring.
 
-1. Get free API key from https://otx.alienvault.com/
-2. Add `OTX_API_KEY` secret to your repo (Settings → Secrets → Actions)
-3. Re-run the workflow
+### Setup
+1. Create free account at https://otx.alienvault.com/
+2. Get your API key from Settings → API Integration
+3. Add `OTX_API_KEY` as a repository secret:
+   - Go to repo Settings → Secrets and variables → Actions
+   - Click "New repository secret"
+   - Name: `OTX_API_KEY`, Value: your key
+4. Run the workflow - threat data will appear on UI
 
-Threat scores are based on OTX pulse count:
-- **Clean** (0 pulses) - No known threats
-- **Low** (1-2 pulses) - Minor concerns
-- **Risk** (3+ pulses) - Known malicious activity
+### How It Works
+- Checks the first 50 working proxies against OTX database
+- Queries IP reputation and threat pulse count
+- Results shown in the Threat column on web UI
+
+### Threat Levels
+| Badge | Pulses | Meaning |
+|-------|--------|---------|
+| **Clean** (green) | 0 | No known threats |
+| **Low** (yellow) | 1-2 | Minor concerns |
+| **Risk** (red) | 3+ | Known malicious activity |
+| **-** (gray) | N/A | Not checked (proxy #51+) |
 
 ---
 
