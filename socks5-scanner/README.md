@@ -44,7 +44,8 @@ proxies = requests.get("https://raw.githubusercontent.com/arandomguyhere/Tools/m
 |---------|-------------|
 | **Sync & Async modes** | Thread-pool or asyncio with semaphore |
 | **GeoIP enrichment** | Country, city, ASN, ISP/org via ip-api.com |
-| **Structured results** | Full `ProxyResult` objects with geo data |
+| **Threat intelligence** | Multi-source: Feodo, SSLBL, URLhaus, OTX |
+| **Structured results** | Full `ProxyResult` objects with geo + threat data |
 | **Error classification** | 15+ error categories |
 | **Configurable timeouts** | Per-stage (connect/read/write/http) |
 | **Retry logic** | Exponential backoff |
@@ -58,7 +59,7 @@ proxies = requests.get("https://raw.githubusercontent.com/arandomguyhere/Tools/m
 - **City names** - Geographic location display
 - **ASN/Org info** - Network and organization data
 - **Latency badges** - Color-coded (green < 200ms, yellow < 500ms, red > 500ms)
-- **Threat badges** - OTX threat intelligence (Clean/Low/Risk)
+- **Threat badges** - Multi-source threat intel (Clean/Low/Risk with tooltips)
 - **Search filter** - Filter by IP, country, city, ASN, or org
 - **Copy buttons** - Copy individual proxy or entire list
 - **Download** - Export working proxies as text file
@@ -292,7 +293,7 @@ The GitHub Actions workflow includes several optimizations:
 | Working Found | ~900 |
 | Scan Time | ~11 minutes |
 | GeoIP Enriched | 500 proxies |
-| Threat Checked | 50 proxies |
+| Threat Checked | ALL proxies (via blocklists) |
 
 ### Theoretical Benchmarks
 | Mode | Concurrency | 5000 proxies | 100K proxies |
@@ -339,31 +340,43 @@ socks5-scanner/
 
 ---
 
-## Threat Intelligence (OTX)
+## Threat Intelligence
 
-Integrated AlienVault OTX threat intelligence for proxy reputation scoring.
+Multi-source threat intelligence checking for ALL proxies using free, unlimited APIs.
 
-### Setup
+### Data Sources (Free, No API Key Required)
+
+| Source | Type | Description |
+|--------|------|-------------|
+| **[Feodo Tracker](https://feodotracker.abuse.ch/)** | Botnet C2 | Tracks botnet command & control servers |
+| **[SSLBL](https://sslbl.abuse.ch/)** | SSL Blacklist | Malicious SSL certificates and IPs |
+| **[URLhaus](https://urlhaus.abuse.ch/)** | Malware URLs | Malware distribution sites |
+
+### Optional: AlienVault OTX (API Key Required)
+
+For additional threat pulse data on the first 50 proxies:
+
 1. Create free account at https://otx.alienvault.com/
 2. Get your API key from Settings → API Integration
 3. Add `OTX_API_KEY` as a repository secret:
    - Go to repo Settings → Secrets and variables → Actions
    - Click "New repository secret"
    - Name: `OTX_API_KEY`, Value: your key
-4. Run the workflow - threat data will appear on UI
 
 ### How It Works
-- Checks the first 50 working proxies against OTX database
-- Queries IP reputation and threat pulse count
-- Results shown in the Threat column on web UI
+1. **Blocklists** are fetched at scan time (no rate limits)
+2. **ALL proxies** are checked against blocklists instantly
+3. **OTX** adds pulse count for first 50 (if API key set)
+4. **Tooltips** show which sources flagged each IP
 
 ### Threat Levels
-| Badge | Pulses | Meaning |
-|-------|--------|---------|
-| **Clean** (green) | 0 | No known threats |
-| **Low** (yellow) | 1-2 | Minor concerns |
-| **Risk** (red) | 3+ | Known malicious activity |
-| **-** (gray) | N/A | Not checked (proxy #51+) |
+| Badge | Score | Meaning |
+|-------|-------|---------|
+| **Clean** (green) | 0 | Not in any blocklist |
+| **Low** (yellow) | 1-4 | Flagged by 1 source or low OTX pulses |
+| **Risk** (red) | 5+ | Multiple sources or high OTX pulses |
+
+Hover over any threat badge to see which sources flagged that IP.
 
 ---
 
