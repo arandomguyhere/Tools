@@ -70,6 +70,8 @@ jobs:
           except ImportError:
               print('uvloop not available, using default event loop')
 
+          import aiohttp
+
           from src.async_scanner_v2 import AsyncScanner
           from src.core import ScanConfig
           from src.scanner import Socks5Scanner
@@ -126,8 +128,6 @@ jobs:
               return results
 
           async def main():
-              import aiohttp
-
               concurrency = int(os.environ.get('CONCURRENCY', '500'))
               config = ScanConfig(
                   connect_timeout=3.0,  # Reduced from 5s
