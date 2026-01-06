@@ -202,6 +202,15 @@ jobs:
 
                   # Build enriched list
                   otx_key = os.environ.get('OTX_API_KEY', '')
+                  otx_success = 0
+                  otx_failed = 0
+                  otx_limit = 50  # Only check first 50 to save time
+
+                  if otx_key:
+                      print(f'OTX API key found, checking first {otx_limit} proxies...')
+                  else:
+                      print('OTX API key not set, skipping threat intelligence')
+
                   for i, r in enumerate(working[:geo_limit]):
                       proxy_data = r.to_dict()
                       ip = r.host or r.proxy.split(':')[0]
@@ -209,32 +218,51 @@ jobs:
                       if ip in all_geo:
                           proxy_data['geo'] = all_geo[ip]
 
-                      # Optional OTX (only first 50 to save time)
-                      if otx_key and i < 50:
+                      # Optional OTX threat intelligence
+                      if otx_key and i < otx_limit:
                           try:
-                              headers = {'X-OTX-API-KEY': otx_key}
+                              headers = dict()
+                              headers['X-OTX-API-KEY'] = otx_key
                               async with geo_session.get(
                                   f'https://otx.alienvault.com/api/v1/indicators/IPv4/{ip}/general',
                                   headers=headers,
-                                  timeout=aiohttp.ClientTimeout(total=3)
+                                  timeout=aiohttp.ClientTimeout(total=5)
                               ) as otx_resp:
                                   if otx_resp.status == 200:
                                       otx = await otx_resp.json()
-                                      pulse_count = otx.get('pulse_info', {}).get('count', 0)
-                                      proxy_data['threat'] = {
-                                          'score': min(pulse_count, 10),
-                                          'pulses': pulse_count,
-                                      }
-                          except:
-                              pass
+                                      pulse_count = otx.get('pulse_info', dict()).get('count', 0)
+                                      proxy_data['threat'] = dict(
+                                          score=min(pulse_count, 10),
+                                          pulses=pulse_count,
+                                      )
+                                      otx_success += 1
+                                  elif otx_resp.status == 403:
+                                      if otx_failed == 0:
+                                          print(f'  OTX API key invalid or expired (HTTP 403)')
+                                      otx_failed += 1
+                                  elif otx_resp.status == 429:
+                                      if otx_failed == 0:
+                                          print(f'  OTX rate limit exceeded (HTTP 429)')
+                                      otx_failed += 1
+                                  else:
+                                      otx_failed += 1
+                          except Exception as e:
+                              if otx_failed == 0:
+                                  print(f'  OTX lookup error: {str(e)[:50]}')
+                              otx_failed += 1
 
                       enriched.append(proxy_data)
+
+                  if otx_key:
+                      print(f'OTX lookups: {otx_success} successful, {otx_failed} failed')
 
               # Add remaining without geo
               for r in working[geo_limit:]:
                   enriched.append(r.to_dict())
 
-              print(f'Enriched {len([e for e in enriched if e.get(\"geo\")])} proxies with geo data')
+              geo_count = len([e for e in enriched if e.get('geo')])
+              threat_count = len([e for e in enriched if e.get('threat')])
+              print(f'Enriched {geo_count} proxies with geo data, {threat_count} with threat data')
 
               # Save results
               with open('proxies/proxies_working.txt', 'w') as f:
@@ -246,16 +274,18 @@ jobs:
                       f.write(f'{r.proxy}\n')
 
               with open('proxies/results.json', 'w') as f:
-                  json.dump({
-                      'timestamp': datetime.utcnow().isoformat() + 'Z',
-                      'stats': {
-                          'total': results.total,
-                          'valid': len(valid),
-                          'working': len(working),
-                          'scan_time_sec': scan_time,
-                      },
-                      'proxies': enriched
-                  }, f, indent=2, default=str)
+                  json.dump(dict(
+                      timestamp=datetime.utcnow().isoformat() + 'Z',
+                      stats=dict(
+                          total=results.total,
+                          valid=len(valid),
+                          working=len(working),
+                          geo_enriched=geo_count,
+                          threat_checked=threat_count,
+                          scan_time_sec=scan_time,
+                      ),
+                      proxies=enriched
+                  ), f, indent=2, default=str)
 
               print(f'Done! Total time: {(datetime.now() - start_time).total_seconds():.1f}s')
 
@@ -275,12 +305,16 @@ jobs:
             TOTAL=$(python -c "import json; d=json.load(open('proxies/results.json')); print(d.get('stats',{}).get('total', 0))" 2>/dev/null || echo "0")
             VALID=$(python -c "import json; d=json.load(open('proxies/results.json')); print(d.get('stats',{}).get('valid', 0))" 2>/dev/null || echo "0")
             WORKING=$(python -c "import json; d=json.load(open('proxies/results.json')); print(d.get('stats',{}).get('working', 0))" 2>/dev/null || echo "0")
+            GEO=$(python -c "import json; d=json.load(open('proxies/results.json')); print(d.get('stats',{}).get('geo_enriched', 0))" 2>/dev/null || echo "0")
+            THREAT=$(python -c "import json; d=json.load(open('proxies/results.json')); print(d.get('stats',{}).get('threat_checked', 0))" 2>/dev/null || echo "0")
             TIME=$(python -c "import json; d=json.load(open('proxies/results.json')); print(f\"{d.get('stats',{}).get('scan_time_sec', 0):.0f}s\")" 2>/dev/null || echo "?")
             echo "| Metric | Count |" >> $GITHUB_STEP_SUMMARY
             echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
             echo "| Total Scanned | $TOTAL |" >> $GITHUB_STEP_SUMMARY
             echo "| SOCKS5 Valid | $VALID |" >> $GITHUB_STEP_SUMMARY
             echo "| Fully Working | $WORKING |" >> $GITHUB_STEP_SUMMARY
+            echo "| GeoIP Enriched | $GEO |" >> $GITHUB_STEP_SUMMARY
+            echo "| OTX Threat Data | $THREAT |" >> $GITHUB_STEP_SUMMARY
             echo "| Scan Time | $TIME |" >> $GITHUB_STEP_SUMMARY
           else
             echo "No results file found" >> $GITHUB_STEP_SUMMARY
