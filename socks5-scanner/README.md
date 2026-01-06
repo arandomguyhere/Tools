@@ -52,10 +52,13 @@ proxies = requests.get("https://raw.githubusercontent.com/arandomguyhere/Tools/m
 | **Pipeline hooks** | Callbacks, filters, webhooks |
 
 ### Web UI Features
-- Country flags and codes
+- **List View** - Sortable table with all proxy data
+- **Map View** - Interactive world map with proxy locations
+- Country flags and city names
 - ASN and organization info
 - Latency with color coding (green/yellow/red)
-- Filter by IP, country, ASN, or org
+- Threat intelligence badges (via OTX)
+- Filter by IP, country, city, ASN, or org
 - Copy individual proxies or entire list
 - Download as file
 
@@ -144,10 +147,16 @@ Every scan returns structured `ProxyResult` objects with GeoIP data:
         "country": "United States",
         "country_code": "US",
         "city": "New York",
+        "lat": 40.7128,
+        "lon": -74.0060,
         "isp": "DigitalOcean LLC",
         "org": "DigitalOcean",
         "asn": "AS14061",
         "asn_org": "DIGITALOCEAN-ASN"
+    },
+    "threat": {
+        "score": 0,
+        "pulses": 0
     }
 }
 ```
@@ -265,13 +274,21 @@ The scanner runs every 6 hours via GitHub Actions:
 
 ## Performance
 
-| Mode | Concurrency | 5000 proxies |
-|------|-------------|--------------|
-| Sync | 50 threads | ~2-3 min |
-| Sync | 100 threads | ~1-2 min |
-| Async | 100 concurrent | ~45 sec |
-| Async | 200 concurrent | ~25 sec |
-| Async + uvloop | 200 concurrent | ~20 sec |
+### CI/CD Optimizations
+The GitHub Actions workflow includes several optimizations:
+- **uvloop** - 20-30% faster async event loop
+- **Batch GeoIP** - 100 IPs per request (vs 1)
+- **Parallel source fetching** - All sources fetched concurrently
+- **500 concurrent connections** - 5x default concurrency
+
+### Benchmarks
+| Mode | Concurrency | 5000 proxies | 100K proxies |
+|------|-------------|--------------|--------------|
+| Sync | 50 threads | ~2-3 min | ~40 min |
+| Sync | 100 threads | ~1-2 min | ~20 min |
+| Async | 100 concurrent | ~45 sec | ~15 min |
+| Async | 500 concurrent | ~15 sec | ~5 min |
+| Async + uvloop | 500 concurrent | ~12 sec | ~4 min |
 
 ---
 
@@ -306,6 +323,21 @@ socks5-scanner/
 ├── requirements.txt
 └── README.md
 ```
+
+---
+
+## Threat Intelligence (OTX)
+
+Optional AlienVault OTX integration for threat scoring:
+
+1. Get free API key from https://otx.alienvault.com/
+2. Add `OTX_API_KEY` secret to your repo (Settings → Secrets → Actions)
+3. Re-run the workflow
+
+Threat scores are based on OTX pulse count:
+- **Clean** (0 pulses) - No known threats
+- **Low** (1-2 pulses) - Minor concerns
+- **Risk** (3+ pulses) - Known malicious activity
 
 ---
 
