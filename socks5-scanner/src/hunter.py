@@ -267,7 +267,9 @@ class ProxyHunter:
     ]
 
     # Backup sources (known good repositories)
+    # Format: (owner, repo, path)
     BACKUP_SOURCES = [
+        # === ORIGINAL SOURCES ===
         ("TheSpeedX", "SOCKS-List", "socks5.txt"),
         ("monosans", "proxy-list", "proxies/socks5.txt"),
         ("hookzof", "socks5_list", "proxy.txt"),
@@ -276,6 +278,106 @@ class ProxyHunter:
         ("ALIILAPRO", "Proxy", "socks5.txt"),
         ("prxchk", "proxy-list", "socks5.txt"),
         ("roosterkid", "openproxylist", "SOCKS5_RAW.txt"),
+
+        # === HIGH-QUALITY UPDATED SOURCES ===
+        ("proxifly", "free-proxy-list", "proxies/protocols/socks5/data.txt"),
+        ("ErcinDedeoglu", "proxies", "proxies/socks5.txt"),
+        ("vakhov", "fresh-proxy-list", "socks5.txt"),
+        ("mmpx12", "proxy-list", "socks5.txt"),
+        ("officialputuid", "KangProxy", "socks5/socks5.txt"),
+        ("MuRongPIG", "Proxy-Master", "socks5.txt"),
+        ("Anonym0usWork1221", "Free-Proxies", "proxy_files/socks5_proxies.txt"),
+        ("zevtyardt", "proxy-list", "socks5.txt"),
+        ("sunny9577", "proxy-scraper", "generated/socks5_proxies.txt"),
+        ("fyvri", "fresh-proxy-list", "socks5.txt"),
+
+        # === VERY ACTIVE (updates every few minutes) ===
+        ("dpangestuw", "Free-Proxy", "socks5.txt"),
+        ("Skillter", "ProxyGather", "proxies/working-proxies-socks5.txt"),
+        ("databay-labs", "free-proxy-list", "socks5.txt"),
+        ("BreakingTechFr", "Proxy_Free", "proxies/socks5.txt"),
+        ("Vadim287", "free-proxy", "socks5.txt"),
+        ("yemixzy", "free-proxy-list", "socks5.txt"),
+        ("claude89757", "free_https_proxies", "socks5.txt"),
+
+        # === ACTIVE DAILY UPDATES ===
+        ("gitrecon1455", "fresh-proxy-list", "socks5.txt"),
+        ("Vann-Dev", "proxy-list", "proxies/socks5.txt"),
+        ("ArrayIterator", "proxy-lists", "proxies/socks5.txt"),
+        ("Noctiro", "getproxy", "file/socks5.txt"),
+        ("tuanminpay", "live-proxy", "socks5.txt"),
+        ("zloi-user", "hideip.me", "socks5.txt"),
+        ("HyperBeats", "proxy-list", "socks5.txt"),
+        ("baklazhan1337", "proxier", "socks5.txt"),
+
+        # === RELIABLE SOURCES ===
+        ("stormsia", "proxy-list", "socks5.txt"),
+        ("ebrasha", "abdal-proxy-hub", "socks5.txt"),
+        ("handeveloper1", "Proxy", "socks5.txt"),
+        ("vmheaven", "VMHeaven-Free-Proxy-Updated", "socks5.txt"),
+        ("iplocate", "free-proxy-list", "socks5.txt"),
+        ("gfpcom", "free-proxy-list", "socks5.txt"),
+        ("sanat1ro", "Mass-Proxy-Parser-Checker", "socks5.txt"),
+        ("kranoley", "Proxy-Scraper-Parser-And-Checker", "socks5.txt"),
+
+        # === ADDITIONAL REPOSITORIES ===
+        ("rdavydov", "proxy-list", "socks5.txt"),
+        ("clarketm", "proxy-list", "socks5.txt"),
+        ("fate0", "proxylist", "socks5.txt"),
+        ("a2u", "free-proxy-list", "socks5.txt"),
+        ("rx443", "proxy-list", "socks5.txt"),
+        ("hendrikbgr", "Free-Proxy-Repo", "socks5.txt"),
+        ("saschazesiger", "Free-Proxies", "socks5.txt"),
+        ("UptimerBot", "proxy-list", "socks5.txt"),
+        ("mertguvencli", "http-proxy-list", "socks5.txt"),
+        ("almroot", "proxylist", "socks5.txt"),
+
+        # === MORE ACTIVE SOURCES ===
+        ("human1ty", "proxy-list", "socks5.txt"),
+        ("BlackSnowDot", "proxylist-update-every-minute", "socks5.txt"),
+        ("proxy4parsing", "proxy-list", "socks5.txt"),
+        ("zenjahid", "FreeProxy4u", "socks5.txt"),
+        ("SevenworksDev", "proxy-list", "socks5.txt"),
+        ("im-razvan", "proxy-list", "socks5.txt"),
+        ("mzyui", "proxy-list", "socks5.txt"),
+        ("casals-ar", "proxy-list", "socks5.txt"),
+        ("ObcbO", "getproxy", "file/socks5.txt"),
+
+        # === BONUS SOURCES ===
+        ("UserR3X", "proxy-list", "socks5.txt"),
+        ("Flavoured", "proxylist", "socks5.txt"),
+        ("B4RC0DE-TM", "proxy-list", "socks5.txt"),
+        ("TheSpeedX", "PROXY-List", "socks5.txt"),
+        ("aslfrancisco", "proxy-list", "socks5.txt"),
+    ]
+
+    # GitHub search queries for dynamic discovery
+    GITHUB_SEARCH_QUERIES = [
+        "socks5 proxy list",
+        "free proxy socks5",
+        "proxy list updated",
+        "socks5 proxies fresh",
+        "free socks5",
+        "proxy scraper socks5",
+        "working proxy list",
+        "proxy list daily",
+        "socks proxy free",
+        "anonymous proxy list",
+    ]
+
+    # Common file paths to check in discovered repos
+    COMMON_PROXY_PATHS = [
+        "socks5.txt", "proxy.txt", "proxies.txt",
+        "socks5/socks5.txt", "proxies/socks5.txt",
+        "data/socks5.txt", "list/socks5.txt",
+        "proxy_files/socks5_proxies.txt",
+        "proxies/protocols/socks5/data.txt",
+        "online-proxies/txt/proxies-socks5.txt",
+        "SOCKS5_RAW.txt", "socks5_proxies.txt",
+        "working-proxies-socks5.txt",
+        "generated/socks5_proxies.txt",
+        "file/socks5.txt",
+        "xResults/socks5.txt",
     ]
 
     def __init__(self, db_path: str = "proxy_hunt.db", github_token: Optional[str] = None):
@@ -333,14 +435,8 @@ class ProxyHunter:
     def discover_raw_url(self, repo: RepositoryInfo) -> Optional[str]:
         """Find the raw URL for a proxy file in a repository."""
         try:
-            # Check common file paths
-            common_paths = [
-                'socks5.txt', 'proxy.txt', 'proxies.txt',
-                'socks5/socks5.txt', 'proxies/socks5.txt',
-                'data/socks5.txt', 'list/socks5.txt',
-            ]
-
-            for path in common_paths:
+            for path in self.COMMON_PROXY_PATHS:
+                # Try main branch first
                 raw_url = f"https://raw.githubusercontent.com/{repo.owner}/{repo.name}/main/{path}"
                 response = self.session.head(raw_url, timeout=5)
 
@@ -358,6 +454,165 @@ class ProxyHunter:
             pass
 
         return None
+
+    def search_github_live(self, max_results_per_query: int = 100) -> List[RepositoryInfo]:
+        """
+        Poll GitHub search API for recently updated proxy repositories.
+
+        This enables dynamic discovery of new sources for scaling to 1M+ proxies.
+        Polls: https://github.com/search?q=free+proxy&type=repositories&s=updated&o=desc
+        """
+        all_repos = []
+        seen_repos = set()
+
+        for query in self.GITHUB_SEARCH_QUERIES:
+            try:
+                # Add date filter for freshness (last 30 days)
+                date_filter = (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
+                full_query = f"{query} pushed:>{date_filter}"
+
+                url = "https://api.github.com/search/repositories"
+                params = {
+                    "q": full_query,
+                    "sort": "updated",
+                    "order": "desc",
+                    "per_page": min(max_results_per_query, 100)
+                }
+
+                response = self.session.get(url, params=params, timeout=15)
+
+                if response.status_code == 200:
+                    data = response.json()
+
+                    for item in data.get('items', []):
+                        repo_key = f"{item['owner']['login']}/{item['name']}"
+
+                        if repo_key in seen_repos:
+                            continue
+                        seen_repos.add(repo_key)
+
+                        scent = self.analyzer.analyze_repository(item)
+
+                        if scent >= 15:  # Lower threshold to catch more sources
+                            repo = RepositoryInfo(
+                                owner=item['owner']['login'],
+                                name=item['name'],
+                                url=item['html_url'],
+                                stars=item.get('stargazers_count', 0),
+                                forks=item.get('forks_count', 0),
+                                updated_at=item.get('updated_at'),
+                                scent_score=scent,
+                            )
+                            all_repos.append(repo)
+                            self.db.upsert_repository(repo)
+
+                elif response.status_code == 403:
+                    print(f"{Color.yellow('Warning:')} GitHub API rate limited, waiting...")
+                    time.sleep(60)  # Wait a minute if rate limited
+
+                time.sleep(2)  # Rate limit protection between queries
+
+            except Exception as e:
+                print(f"{Color.red('Error:')} GitHub live search failed for '{query}': {e}")
+
+        # Sort by scent score
+        all_repos.sort(key=lambda r: r.scent_score, reverse=True)
+        return all_repos
+
+    def mega_hunt(self, show_progress: bool = True) -> Tuple[List[str], List[HuntResult]]:
+        """
+        High-performance hunting mode for 1M+ proxy discovery.
+
+        Combines:
+        1. All 60+ backup sources
+        2. Dynamic GitHub search discovery
+        3. Historical best performers
+        """
+        all_proxies: Set[str] = set()
+        results: List[HuntResult] = []
+
+        if show_progress:
+            print(f"\n{Color.cyan('MEGA HUNT')} - High-performance proxy discovery")
+            print(f"Backup sources: {len(self.BACKUP_SOURCES)}")
+
+        # Phase 1: Fetch from all backup sources (parallel-friendly)
+        if show_progress:
+            print(f"\n{Color.bold('Phase 1:')} Fetching from {len(self.BACKUP_SOURCES)} backup sources...")
+
+        for i, (owner, name, path) in enumerate(self.BACKUP_SOURCES):
+            raw_url = f"https://raw.githubusercontent.com/{owner}/{name}/main/{path}"
+            proxies = self.fetch_proxies(raw_url)
+
+            if not proxies:
+                raw_url = f"https://raw.githubusercontent.com/{owner}/{name}/master/{path}"
+                proxies = self.fetch_proxies(raw_url)
+
+            if proxies:
+                if show_progress:
+                    print(f"  [{i+1}/{len(self.BACKUP_SOURCES)}] {Color.green('✓')} {owner}/{name}: {len(proxies):,}")
+                all_proxies.update(proxies)
+
+                repo = RepositoryInfo(
+                    owner=owner, name=name,
+                    url=f"https://github.com/{owner}/{name}",
+                    raw_url=raw_url
+                )
+                self.db.upsert_repository(repo)
+                self.db.record_hunt(repo, len(proxies), len(proxies))
+                results.append(HuntResult(repo, len(proxies), len(proxies)))
+            elif show_progress:
+                print(f"  [{i+1}/{len(self.BACKUP_SOURCES)}] {Color.red('✗')} {owner}/{name}: no proxies")
+
+        if show_progress:
+            print(f"\n  Subtotal: {Color.green(f'{len(all_proxies):,}')} unique proxies")
+
+        # Phase 2: Dynamic GitHub discovery
+        if show_progress:
+            print(f"\n{Color.bold('Phase 2:')} Dynamic GitHub search discovery...")
+
+        discovered = self.search_github_live(max_results_per_query=100)
+        if show_progress:
+            print(f"  Discovered {len(discovered)} potential repositories")
+
+        for repo in discovered[:50]:  # Check top 50 by scent score
+            raw_url = self.discover_raw_url(repo)
+            if raw_url:
+                proxies = self.fetch_proxies(raw_url)
+                if proxies:
+                    if show_progress:
+                        print(f"  {Color.green('✓')} {repo.owner}/{repo.name}: {len(proxies):,} (scent: {repo.scent_score:.0f})")
+                    all_proxies.update(proxies)
+                    repo.raw_url = raw_url
+                    self.db.record_hunt(repo, len(proxies), 0)
+                    results.append(HuntResult(repo, len(proxies), 0))
+
+        # Phase 3: Historical best performers
+        if show_progress:
+            print(f"\n{Color.bold('Phase 3:')} Checking historical top performers...")
+
+        best_repos = self.db.get_best_repositories(limit=30)
+        for repo in best_repos:
+            if repo.raw_url:
+                repo_key = f"{repo.owner}/{repo.name}"
+                if not any(repo_key == f"{r.repository.owner}/{r.repository.name}" for r in results):
+                    proxies = self.fetch_proxies(repo.raw_url)
+                    if proxies:
+                        if show_progress:
+                            print(f"  {Color.green('✓')} {repo.owner}/{repo.name}: {len(proxies):,} (score: {repo.hunt_score:.0f})")
+                        all_proxies.update(proxies)
+
+        proxy_list = list(all_proxies)
+
+        if show_progress:
+            print(f"\n{Color.bold('='*50)}")
+            print(f"{Color.bold('MEGA HUNT COMPLETE')}")
+            print(f"Total unique proxies: {Color.green(f'{len(proxy_list):,}')}")
+            print(f"Sources checked: {len(results)}")
+            stats = self.db.get_stats()
+            print(f"Tracked repositories: {stats['total_repos']}")
+            print(f"{Color.bold('='*50)}")
+
+        return proxy_list, results
 
     def fetch_proxies(self, url: str) -> List[str]:
         """Fetch proxy list from a URL."""
