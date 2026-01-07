@@ -45,6 +45,8 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          # Install geoip2fast for offline GeoIP (100K+ lookups/sec, no rate limits)
+          pip install geoip2fast
 
       - name: Create output directories
         working-directory: socks5-scanner
@@ -75,6 +77,39 @@ jobs:
           from src.async_scanner_v2 import AsyncScanner
           from src.core import ScanConfig
           from src.scanner import Socks5Scanner
+
+          # Initialize geoip2fast for offline lookups (100K+ lookups/sec)
+          # Falls back gracefully if database not available
+          geoip_offline = None
+          try:
+              from geoip2fast import GeoIP2Fast
+              geoip_offline = GeoIP2Fast()
+              print(f'Loaded geoip2fast offline database ({geoip_offline.get_database_path()})')
+          except Exception as e:
+              print(f'geoip2fast not available, will use ip-api.com only: {e}')
+
+          def offline_geoip_lookup(ip):
+              \"\"\"Fast offline GeoIP lookup using geoip2fast (~0.00003s per lookup).\"\"\"
+              if not geoip_offline:
+                  return None
+              try:
+                  result = geoip_offline.lookup(ip)
+                  if result and result.country_code:
+                      return dict(
+                          country=result.country_name,
+                          country_code=result.country_code,
+                          city=getattr(result, 'city', None),
+                          lat=getattr(result, 'latitude', None),
+                          lon=getattr(result, 'longitude', None),
+                          asn=f'AS{result.asn}' if hasattr(result, 'asn') and result.asn else None,
+                          asn_org=getattr(result, 'asn_name', None),
+                          isp=None,  # Not available in offline DB
+                          org=None,  # Not available in offline DB
+                          source='geoip2fast',
+                      )
+              except Exception:
+                  pass
+              return None
 
           async def fetch_source(session, url, proxies_set):
               \"\"\"Fetch a single source and add to proxy set.\"\"\"
@@ -239,26 +274,51 @@ jobs:
 
               print(f'Results: {results.total} scanned, {len(valid)} valid, {len(working)} working')
 
-              # OPTIMIZATION 2: Batch GeoIP (100 IPs per request instead of 1)
-              print('Enriching with GeoIP data (batch mode)...')
+              # HYBRID GEOIP: Offline first (100K+/sec), then API fallback
+              # Phase 1: Fast offline lookup for ALL working proxies
+              print('Enriching with GeoIP data (hybrid: offline + API fallback)...')
               enriched = []
-              geo_limit = min(len(working), 500)
+              all_geo = {}
+              offline_hits = 0
+              offline_misses = []
 
+              # Extract all IPs
+              all_ips = []
+              for r in working:
+                  ip = r.host or r.proxy.split(':')[0]
+                  all_ips.append(ip)
+
+              # Phase 1: Offline lookup (instant, no rate limits)
+              if geoip_offline:
+                  print(f'  Phase 1: Offline lookup for {len(all_ips)} IPs...')
+                  import time
+                  start = time.time()
+                  for ip in all_ips:
+                      geo = offline_geoip_lookup(ip)
+                      if geo:
+                          all_geo[ip] = geo
+                          offline_hits += 1
+                      else:
+                          offline_misses.append(ip)
+                  elapsed = time.time() - start
+                  print(f'  Offline: {offline_hits} found, {len(offline_misses)} missing ({elapsed:.2f}s, {len(all_ips)/max(elapsed,0.001):.0f} lookups/sec)')
+              else:
+                  offline_misses = all_ips
+                  print(f'  Offline DB not available, using API for all {len(all_ips)} IPs')
+
+              # Phase 2: API fallback for missing IPs (rate limited)
               async with aiohttp.ClientSession() as geo_session:
-                  # Extract IPs for batch lookup
-                  ips_to_lookup = []
-                  for r in working[:geo_limit]:
-                      ip = r.host or r.proxy.split(':')[0]
-                      ips_to_lookup.append(ip)
-
-                  # Batch lookup in chunks of 100
-                  all_geo = {}
-                  for i in range(0, len(ips_to_lookup), 100):
-                      batch = ips_to_lookup[i:i+100]
-                      geo_results = await batch_geoip(geo_session, batch)
-                      all_geo.update(geo_results)
-                      print(f'  GeoIP batch {i//100 + 1}/{(len(ips_to_lookup)+99)//100}: {len(geo_results)} results')
-                      await asyncio.sleep(0.5)  # Rate limit between batches
+                  if offline_misses:
+                      print(f'  Phase 2: API fallback for {len(offline_misses)} IPs...')
+                      for i in range(0, len(offline_misses), 100):
+                          batch = offline_misses[i:i+100]
+                          geo_results = await batch_geoip(geo_session, batch)
+                          # Mark API results with source
+                          for ip, geo in geo_results.items():
+                              geo['source'] = 'ip-api.com'
+                          all_geo.update(geo_results)
+                          print(f'    API batch {i//100 + 1}/{(len(offline_misses)+99)//100}: {len(geo_results)} results')
+                          await asyncio.sleep(0.5)  # Rate limit between batches
 
                   # Fetch threat blocklists (free, unlimited - checks ALL proxies)
                   print('Fetching threat intelligence blocklists...')
@@ -276,7 +336,7 @@ jobs:
                   if otx_key:
                       print(f'OTX API key found, will check first {otx_limit} proxies')
 
-                  for i, r in enumerate(working[:geo_limit]):
+                  for i, r in enumerate(working):
                       proxy_data = r.to_dict()
                       ip = r.host or r.proxy.split(':')[0]
 
@@ -333,13 +393,12 @@ jobs:
                   if otx_key:
                       print(f'OTX lookups: {otx_success} successful, {otx_failed} failed')
 
-              # Add remaining without geo
-              for r in working[geo_limit:]:
-                  enriched.append(r.to_dict())
-
               geo_count = len([e for e in enriched if e.get('geo')])
+              offline_count = len([e for e in enriched if e.get('geo', {}).get('source') == 'geoip2fast'])
+              api_count = len([e for e in enriched if e.get('geo', {}).get('source') == 'ip-api.com'])
               threat_count = len([e for e in enriched if e.get('threat')])
-              print(f'Enriched {geo_count} proxies with geo data, {threat_count} with threat data')
+              print(f'GeoIP: {geo_count} total ({offline_count} offline, {api_count} API)')
+              print(f'Threat: {threat_count} proxies checked')
 
               # Save results
               with open('proxies/proxies_working.txt', 'w') as f:
@@ -358,6 +417,8 @@ jobs:
                           valid=len(valid),
                           working=len(working),
                           geo_enriched=geo_count,
+                          geo_offline=offline_count,
+                          geo_api=api_count,
                           threat_checked=threat_count,
                           scan_time_sec=scan_time,
                       ),
@@ -383,6 +444,8 @@ jobs:
             VALID=$(python -c "import json; d=json.load(open('proxies/results.json')); print(d.get('stats',{}).get('valid', 0))" 2>/dev/null || echo "0")
             WORKING=$(python -c "import json; d=json.load(open('proxies/results.json')); print(d.get('stats',{}).get('working', 0))" 2>/dev/null || echo "0")
             GEO=$(python -c "import json; d=json.load(open('proxies/results.json')); print(d.get('stats',{}).get('geo_enriched', 0))" 2>/dev/null || echo "0")
+            GEO_OFFLINE=$(python -c "import json; d=json.load(open('proxies/results.json')); print(d.get('stats',{}).get('geo_offline', 0))" 2>/dev/null || echo "0")
+            GEO_API=$(python -c "import json; d=json.load(open('proxies/results.json')); print(d.get('stats',{}).get('geo_api', 0))" 2>/dev/null || echo "0")
             THREAT=$(python -c "import json; d=json.load(open('proxies/results.json')); print(d.get('stats',{}).get('threat_checked', 0))" 2>/dev/null || echo "0")
             TIME=$(python -c "import json; d=json.load(open('proxies/results.json')); print(f\"{d.get('stats',{}).get('scan_time_sec', 0):.0f}s\")" 2>/dev/null || echo "?")
             echo "| Metric | Count |" >> $GITHUB_STEP_SUMMARY
@@ -391,7 +454,9 @@ jobs:
             echo "| SOCKS5 Valid | $VALID |" >> $GITHUB_STEP_SUMMARY
             echo "| Fully Working | $WORKING |" >> $GITHUB_STEP_SUMMARY
             echo "| GeoIP Enriched | $GEO |" >> $GITHUB_STEP_SUMMARY
-            echo "| OTX Threat Data | $THREAT |" >> $GITHUB_STEP_SUMMARY
+            echo "| ↳ Offline (geoip2fast) | $GEO_OFFLINE |" >> $GITHUB_STEP_SUMMARY
+            echo "| ↳ API (ip-api.com) | $GEO_API |" >> $GITHUB_STEP_SUMMARY
+            echo "| Threat Checked | $THREAT |" >> $GITHUB_STEP_SUMMARY
             echo "| Scan Time | $TIME |" >> $GITHUB_STEP_SUMMARY
           else
             echo "No results file found" >> $GITHUB_STEP_SUMMARY
