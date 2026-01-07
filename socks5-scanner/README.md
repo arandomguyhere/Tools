@@ -43,7 +43,7 @@ proxies = requests.get("https://raw.githubusercontent.com/arandomguyhere/Tools/m
 | Feature | Description |
 |---------|-------------|
 | **Sync & Async modes** | Thread-pool or asyncio with semaphore |
-| **Hybrid GeoIP** | Offline DB (100K+/sec) + API fallback for ALL proxies |
+| **Hybrid GeoIP** | Offline GeoLite2 (50K+/sec) + API fallback for ALL proxies |
 | **Threat intelligence** | Multi-source: Feodo, SSLBL, URLhaus, OTX |
 | **Structured results** | Full `ProxyResult` objects with geo + threat data |
 | **Error classification** | 15+ error categories |
@@ -281,7 +281,7 @@ The scanner runs every 6 hours via GitHub Actions:
 ### CI/CD Optimizations
 The GitHub Actions workflow includes several optimizations:
 - **uvloop** - 20-30% faster async event loop
-- **Hybrid GeoIP** - Offline database (100K+ lookups/sec) + API fallback
+- **Hybrid GeoIP** - GeoLite2 offline database (50K+ lookups/sec) + API fallback
 - **Parallel source fetching** - All 20+ sources fetched concurrently
 - **500 concurrent connections** - 5x default concurrency
 - **No GeoIP limits** - ALL working proxies enriched (not capped at 500)
@@ -293,8 +293,8 @@ The GitHub Actions workflow includes several optimizations:
 | Working Found | ~900 |
 | Scan Time | ~11 minutes |
 | GeoIP Enriched | **ALL working proxies** |
-| ↳ Offline (geoip2fast) | ~95% (instant) |
-| ↳ API fallback | ~5% (rate-limited) |
+| ↳ Offline (GeoLite2) | ~98% (instant) |
+| ↳ API fallback | ~2% (rate-limited) |
 | Threat Checked | ALL proxies (via blocklists) |
 
 ### Theoretical Benchmarks
@@ -391,17 +391,17 @@ The scanner uses a **hybrid approach** for maximum GeoIP coverage with minimal l
 ┌─────────────────────────────────────────────────────────────┐
 │                    HYBRID GEOIP STRATEGY                    │
 ├─────────────────────────────────────────────────────────────┤
-│  Phase 1: Offline Database (geoip2fast)                     │
-│  ├─ Speed: 100,000+ lookups/second                          │
-│  ├─ Data: Country, City, ASN, Coordinates                   │
-│  ├─ Coverage: ~95% of IPs                                   │
+│  Phase 1: Offline Database (GeoLite2-City)                  │
+│  ├─ Speed: 50,000+ lookups/second                           │
+│  ├─ Data: Country, City, Coordinates                        │
+│  ├─ Coverage: ~98% of IPs                                   │
 │  └─ No rate limits, no API keys needed                      │
 ├─────────────────────────────────────────────────────────────┤
 │  Phase 2: API Fallback (ip-api.com batch)                   │
 │  ├─ For: IPs not found in offline DB                        │
 │  ├─ Speed: 100 IPs per request, 45 req/min                  │
 │  ├─ Data: Country, City, ISP, Org, ASN                      │
-│  └─ Only used for ~5% of IPs                                │
+│  └─ Only used for ~2% of IPs                                │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -409,18 +409,18 @@ The scanner uses a **hybrid approach** for maximum GeoIP coverage with minimal l
 
 | Method | 1,000 IPs | 10,000 IPs | 100,000 IPs |
 |--------|-----------|------------|-------------|
-| **Hybrid (current)** | ~0.1s | ~1s | ~10s |
+| **Hybrid (current)** | ~0.02s | ~0.2s | ~2s |
 | API-only (old) | ~2 min | ~22 min | ~3.7 hours |
-| Improvement | **1,200x** | **1,320x** | **1,332x** |
+| Improvement | **6,000x** | **6,600x** | **6,660x** |
 
 ### Data Sources
 
 | Source | Type | Fields | Rate Limit |
 |--------|------|--------|------------|
-| [geoip2fast](https://github.com/rabuchaim/geoip2fast) | Offline DB | Country, City, ASN, Coords | None |
-| [ip-api.com](https://ip-api.com/) | REST API | + ISP, Org | 45 req/min |
+| [GeoLite2-City](https://github.com/P3TERX/GeoLite.mmdb) | Offline MMDB | Country, City, Coords | None |
+| [ip-api.com](https://ip-api.com/) | REST API | + ISP, Org, ASN | 45 req/min |
 
-The offline database is bundled with geoip2fast and updated weekly from MaxMind GeoLite2 data.
+The GeoLite2 database is downloaded fresh each scan from a community-maintained mirror (updated daily).
 
 ---
 
