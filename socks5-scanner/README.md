@@ -45,6 +45,7 @@ proxies = requests.get("https://raw.githubusercontent.com/arandomguyhere/Tools/m
 | **Sync & Async modes** | Thread-pool or asyncio with semaphore |
 | **Hybrid GeoIP** | Offline GeoLite2 (50K+/sec) + API fallback for ALL proxies |
 | **Threat intelligence** | Multi-source: Feodo, SSLBL, URLhaus, OTX |
+| **UDP ASSOCIATE Testing** | Tests RFC 1928 UDP relay support (unique feature) |
 | **Structured results** | Full `ProxyResult` objects with geo + threat data |
 | **Error classification** | 15+ error categories |
 | **Configurable timeouts** | Per-stage (connect/read/write/http) |
@@ -327,6 +328,7 @@ socks5-scanner/
 │   ├── sync_scanner.py       # Sync scanner
 │   ├── async_scanner_v2.py   # Async scanner
 │   ├── geoip.py              # GeoIP enrichment (MaxMind + ip-api)
+│   ├── udp_associate.py      # UDP ASSOCIATE testing (RFC 1928)
 │   ├── anonymity.py          # Anonymity detection
 │   ├── fingerprint.py        # Proxy quality profiling
 │   ├── logger.py             # Logging
@@ -424,6 +426,78 @@ The GeoLite2 database is downloaded fresh each scan from a community-maintained 
 
 ---
 
+## UDP ASSOCIATE Testing (Unique Feature)
+
+This scanner tests **UDP ASSOCIATE** support (RFC 1928 CMD=0x03) - a SOCKS5 capability that most scanners skip.
+
+### Why It Matters
+- **DNS queries** can go through UDP (prevents DNS leaks)
+- **QUIC/HTTP3** uses UDP exclusively
+- **VoIP/Gaming** apps need UDP relay
+- **Full SOCKS5 compliance** verification
+
+### Protocol Flow (RFC 1928 Section 7)
+```
+Client                              SOCKS5 Proxy
+   │                                      │
+   │  1. TCP Connect                      │
+   │─────────────────────────────────────>│
+   │  2. Auth Handshake                   │
+   │<────────────────────────────────────>│
+   │  3. UDP ASSOCIATE (CMD=0x03)         │
+   │─────────────────────────────────────>│
+   │  4. Reply: BND.ADDR:BND.PORT         │
+   │<─────────────────────────────────────│
+   │                                      │
+   │  5. Send UDP to BND.ADDR:BND.PORT    │
+   │  (with SOCKS5 header encapsulation)  │
+   │ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─>│───> Destination
+   │                                      │
+   └──── TCP stays OPEN (controls session)│
+```
+
+### Test Results
+Each proxy gets a `udp` field in results:
+```json
+{
+    "proxy": "1.2.3.4:1080",
+    "udp": {
+        "udp_supported": true,
+        "udp_works": false,
+        "result": "supported",
+        "handshake_ms": 45.2,
+        "bnd_addr": "1.2.3.4",
+        "bnd_port": 10800,
+        "reply_code": 0
+    }
+}
+```
+
+### Result Types
+| Result | Meaning |
+|--------|---------|
+| `success` | UDP relay fully tested and working |
+| `supported` | UDP ASSOCIATE accepted (relay untested) |
+| `not_supported` | Proxy returned CMD_NOT_SUPPORTED (0x07) |
+| `auth_required` | Authentication needed for UDP |
+| `timeout` | Connection/operation timeout |
+| `error` | Other failure |
+
+### Python API
+```python
+from src.udp_associate import test_udp_associate
+import asyncio
+
+async def check_udp():
+    result = await test_udp_associate("1.2.3.4", 1080, timeout=5.0)
+    print(f"UDP Supported: {result.udp_supported}")
+    print(f"BND Address: {result.bnd_addr}:{result.bnd_port}")
+
+asyncio.run(check_udp())
+```
+
+---
+
 ## Additional Modules
 
 ```python
@@ -432,6 +506,11 @@ from src.geoip import GeoIPEnricher
 enricher = GeoIPEnricher()
 info = enricher.enrich("1.2.3.4")
 # Returns: country, city, ASN, ISP, org
+
+# UDP ASSOCIATE testing (RFC 1928 Section 7)
+from src.udp_associate import test_udp_sync
+result = test_udp_sync("1.2.3.4:1080")
+# Returns: udp_supported, bnd_addr, bnd_port, result type
 
 # Anonymity detection
 from src.anonymity import AnonymityChecker

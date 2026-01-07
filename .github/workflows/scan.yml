@@ -409,6 +409,63 @@ jobs:
               print(f'GeoIP: {geo_count} total ({offline_count} offline, {api_count} API)')
               print(f'Threat: {threat_count} proxies checked')
 
+              # UDP ASSOCIATE testing (unique SOCKS5 feature most scanners skip)
+              print('Testing UDP ASSOCIATE support (RFC 1928 CMD=0x03)...')
+              try:
+                  from src.udp_associate import test_udp_associate, UDPTestResult
+
+                  udp_semaphore = asyncio.Semaphore(100)  # Limit concurrent UDP tests
+                  udp_results = {}
+                  udp_supported_count = 0
+                  udp_not_supported = 0
+                  udp_errors = 0
+
+                  async def test_udp(proxy_str):
+                      async with udp_semaphore:
+                          try:
+                              host, port_str = proxy_str.rsplit(':', 1)
+                              port = int(port_str)
+                              result = await test_udp_associate(host, port, timeout=3.0, test_dns=False)
+                              return (proxy_str, result)
+                          except Exception as e:
+                              return (proxy_str, None)
+
+                  # Test all working proxies for UDP support
+                  proxy_list = [r.proxy for r in working]
+                  print(f'  Testing {len(proxy_list)} proxies for UDP support...')
+
+                  import time
+                  udp_start = time.time()
+                  udp_tasks = [test_udp(p) for p in proxy_list]
+                  udp_task_results = await asyncio.gather(*udp_tasks)
+                  udp_elapsed = time.time() - udp_start
+
+                  for proxy_str, result in udp_task_results:
+                      if result:
+                          udp_results[proxy_str] = result.to_dict()
+                          if result.udp_supported:
+                              udp_supported_count += 1
+                          elif result.result == UDPTestResult.NOT_SUPPORTED:
+                              udp_not_supported += 1
+                          else:
+                              udp_errors += 1
+                      else:
+                          udp_errors += 1
+
+                  # Add UDP results to enriched data
+                  for e in enriched:
+                      proxy = e.get('proxy')
+                      if proxy in udp_results:
+                          e['udp'] = udp_results[proxy]
+
+                  print(f'  UDP: {udp_supported_count} supported, {udp_not_supported} not supported, {udp_errors} errors ({udp_elapsed:.1f}s)')
+              except ImportError as ie:
+                  print(f'  UDP testing module not available: {ie}')
+                  udp_supported_count = 0
+              except Exception as e:
+                  print(f'  UDP testing failed: {e}')
+                  udp_supported_count = 0
+
               # Save results
               with open('proxies/proxies_working.txt', 'w') as f:
                   for r in working:
@@ -429,6 +486,7 @@ jobs:
                           geo_offline=offline_count,
                           geo_api=api_count,
                           threat_checked=threat_count,
+                          udp_supported=udp_supported_count,
                           scan_time_sec=scan_time,
                       ),
                       proxies=enriched
@@ -456,6 +514,7 @@ jobs:
             GEO_OFFLINE=$(python -c "import json; d=json.load(open('proxies/results.json')); print(d.get('stats',{}).get('geo_offline', 0))" 2>/dev/null || echo "0")
             GEO_API=$(python -c "import json; d=json.load(open('proxies/results.json')); print(d.get('stats',{}).get('geo_api', 0))" 2>/dev/null || echo "0")
             THREAT=$(python -c "import json; d=json.load(open('proxies/results.json')); print(d.get('stats',{}).get('threat_checked', 0))" 2>/dev/null || echo "0")
+            UDP=$(python -c "import json; d=json.load(open('proxies/results.json')); print(d.get('stats',{}).get('udp_supported', 0))" 2>/dev/null || echo "0")
             TIME=$(python -c "import json; d=json.load(open('proxies/results.json')); print(f\"{d.get('stats',{}).get('scan_time_sec', 0):.0f}s\")" 2>/dev/null || echo "?")
             echo "| Metric | Count |" >> $GITHUB_STEP_SUMMARY
             echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
@@ -466,6 +525,7 @@ jobs:
             echo "| ↳ Offline (GeoLite2) | $GEO_OFFLINE |" >> $GITHUB_STEP_SUMMARY
             echo "| ↳ API (ip-api.com) | $GEO_API |" >> $GITHUB_STEP_SUMMARY
             echo "| Threat Checked | $THREAT |" >> $GITHUB_STEP_SUMMARY
+            echo "| **UDP Supported** | **$UDP** |" >> $GITHUB_STEP_SUMMARY
             echo "| Scan Time | $TIME |" >> $GITHUB_STEP_SUMMARY
           else
             echo "No results file found" >> $GITHUB_STEP_SUMMARY
