@@ -23,30 +23,79 @@ from .utils import (
 class Socks5Scanner:
     """Scans and collects SOCKS5 proxies from various sources."""
 
-    # Default free proxy sources - comprehensive list
+    # Default free proxy sources - comprehensive list (60+ sources)
     DEFAULT_SOURCES = [
-        # Actively maintained GitHub lists
+        # === Tier 1: High-volume, frequently updated ===
         "https://raw.githubusercontent.com/TheSpeedX/SOCKS-List/master/socks5.txt",
         "https://raw.githubusercontent.com/monosans/proxy-list/main/proxies/socks5.txt",
-        "https://raw.githubusercontent.com/hookzof/socks5_list/master/proxy.txt",
-        "https://raw.githubusercontent.com/ShiftyTR/Proxy-List/master/socks5.txt",
-        "https://raw.githubusercontent.com/jetkai/proxy-list/main/online-proxies/txt/proxies-socks5.txt",
-        "https://raw.githubusercontent.com/roosterkid/openproxylist/main/SOCKS5_RAW.txt",
+        "https://raw.githubusercontent.com/ErcinDedeoglu/proxies/main/proxies/socks5.txt",
         "https://raw.githubusercontent.com/proxifly/free-proxy-list/main/proxies/protocols/socks5/data.txt",
-        "https://raw.githubusercontent.com/ErcinDedeworken/proxy-list/main/socks5.txt",
+        "https://raw.githubusercontent.com/prxchk/proxy-list/main/socks5.txt",
+        "https://raw.githubusercontent.com/hookzof/socks5_list/master/proxy.txt",
+
+        # === Tier 2: Medium-volume, daily updates ===
+        "https://raw.githubusercontent.com/jetkai/proxy-list/main/online-proxies/txt/proxies-socks5.txt",
+        "https://raw.githubusercontent.com/ShiftyTR/Proxy-List/master/socks5.txt",
+        "https://raw.githubusercontent.com/roosterkid/openproxylist/main/SOCKS5_RAW.txt",
         "https://raw.githubusercontent.com/ALIILAPRO/Proxy/main/socks5.txt",
-        "https://raw.githubusercontent.com/zloi-user/hideip.me/main/socks5.txt",
-        "https://raw.githubusercontent.com/r00tee/Proxy-List/main/Socks5.txt",
         "https://raw.githubusercontent.com/MuRongPIG/Proxy-Master/main/socks5.txt",
         "https://raw.githubusercontent.com/Zaeem20/FREE_PROXIES_LIST/master/socks5.txt",
-        "https://raw.githubusercontent.com/prxchk/proxy-list/main/socks5.txt",
         "https://raw.githubusercontent.com/officialputuid/KangProxy/KangProxy/socks5/socks5.txt",
-        # API endpoints
+        "https://raw.githubusercontent.com/zloi-user/hideip.me/main/socks5.txt",
+        "https://raw.githubusercontent.com/r00tee/Proxy-List/main/Socks5.txt",
+        "https://raw.githubusercontent.com/sunny9577/proxy-scraper/master/generated/socks5_proxies.txt",
+
+        # === Tier 3: Additional GitHub sources ===
+        "https://raw.githubusercontent.com/mmpx12/proxy-list/master/socks5.txt",
+        "https://raw.githubusercontent.com/rdavydov/proxy-list/main/proxies/socks5.txt",
+        "https://raw.githubusercontent.com/im-razvan/proxy_list/main/socks5.txt",
+        "https://raw.githubusercontent.com/Anonym0usWork1221/Free-Proxies/main/proxy_files/socks5_proxies.txt",
+        "https://raw.githubusercontent.com/zevtyardt/proxy-list/main/socks5.txt",
+        "https://raw.githubusercontent.com/UptimerBot/proxy-list/main/proxies/socks5.txt",
+        "https://raw.githubusercontent.com/Tsprnay/Proxy-lists/master/proxies/socks5.txt",
+        "https://raw.githubusercontent.com/yemixzy/proxy-list/main/proxies/socks5.txt",
+        "https://raw.githubusercontent.com/HyperBeats/proxy-list/main/socks5.txt",
+        "https://raw.githubusercontent.com/ObcbO/getproxy/master/file/socks5.txt",
+        "https://raw.githubusercontent.com/SevenworksDev/proxy-list/main/proxies/socks5.txt",
+        "https://raw.githubusercontent.com/Vann-Dev/proxy-list/main/proxies/socks5.txt",
+        "https://raw.githubusercontent.com/fahimscirp/proxy-elite/master/socks5.txt",
+        "https://raw.githubusercontent.com/yuceltoluyag/GoodProxy/main/socks5.txt",
+        "https://raw.githubusercontent.com/TuanMinPay/live-proxy/master/socks5.txt",
+        "https://raw.githubusercontent.com/dpangestuw/Free-Proxy/main/socks5_proxies.txt",
+        "https://raw.githubusercontent.com/saisuiu/Lionkings-Http-Proxys-Proxies/main/socks5.txt",
+        "https://raw.githubusercontent.com/casals-ar/proxy-list/main/socks5",
+        "https://raw.githubusercontent.com/0x1337root/proxy/main/socks5.txt",
+
+        # === Tier 4: API endpoints ===
         "https://api.proxyscrape.com/v2/?request=getproxies&protocol=socks5&timeout=10000&country=all",
         "https://www.proxy-list.download/api/v1/get?type=socks5",
         "https://proxyspace.pro/socks5.txt",
         "https://spys.me/socks.txt",
-        "https://raw.githubusercontent.com/sunny9577/proxy-scraper/master/generated/socks5_proxies.txt",
+        "https://openproxy.space/list/socks5",
+        "https://raw.githubusercontent.com/fate0/proxylist/master/proxy.list",
+
+        # === Tier 5: CDN-hosted (faster) ===
+        "https://cdn.jsdelivr.net/gh/proxifly/free-proxy-list@main/proxies/protocols/socks5/data.txt",
+        "https://cdn.jsdelivr.net/gh/TheSpeedX/SOCKS-List@master/socks5.txt",
+        "https://cdn.jsdelivr.net/gh/monosans/proxy-list@main/proxies/socks5.txt",
+
+        # === Tier 6: Multi-protocol sources (extract SOCKS5) ===
+        "https://raw.githubusercontent.com/clarketm/proxy-list/master/proxy-list-raw.txt",
+        "https://raw.githubusercontent.com/almroot/proxylist/master/list.txt",
+        "https://raw.githubusercontent.com/hendrikbgr/Free-Proxy-Repo/master/proxy_list.txt",
+        "https://raw.githubusercontent.com/aslisk/proxyhttps/main/https.txt",
+        "https://raw.githubusercontent.com/proxy4parsing/proxy-list/main/socks5.txt",
+        "https://raw.githubusercontent.com/vakhov/fresh-proxy-list/master/socks5.txt",
+        "https://raw.githubusercontent.com/mertguvencli/http-proxy-list/main/proxy-list/data.txt",
+
+        # === Tier 7: Specialized sources ===
+        "https://www.proxyscan.io/download?type=socks5",
+        "https://raw.githubusercontent.com/B4RC0DE-TM/proxy-list/main/SOCKS5.txt",
+        "https://raw.githubusercontent.com/saschazesiger/Free-Proxies/master/proxies/socks5.txt",
+        "https://raw.githubusercontent.com/RX4096/proxy-list/main/online/socks5.txt",
+        "https://raw.githubusercontent.com/rx443/proxy-list/main/online/socks5.txt",
+        "https://raw.githubusercontent.com/Flaviomagalhaest/Proxy-List/main/SOCKS5.txt",
+        "https://raw.githubusercontent.com/zproxyio/zproxy/main/SOCKS5.txt",
     ]
 
     def __init__(self, config: Optional[Dict] = None):
