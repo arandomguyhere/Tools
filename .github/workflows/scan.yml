@@ -54,7 +54,9 @@ jobs:
           mkdir -p data
           # Download free GeoLite2-City database (updated daily, no account needed)
           curl -sL "https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-City.mmdb" -o data/GeoLite2-City.mmdb
-          ls -lh data/GeoLite2-City.mmdb
+          # Download free GeoLite2-ASN database for ASN/Org data
+          curl -sL "https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-ASN.mmdb" -o data/GeoLite2-ASN.mmdb
+          ls -lh data/
 
       - name: Create output directories
         working-directory: socks5-scanner
@@ -63,7 +65,7 @@ jobs:
       - name: Run proxy scan
         working-directory: socks5-scanner
         continue-on-error: true
-        timeout-minutes: 45
+        timeout-minutes: 90
         run: |
           python -c "
           import asyncio
@@ -86,36 +88,54 @@ jobs:
           from src.core import ScanConfig
           from src.scanner import Socks5Scanner
 
-          # Initialize geoip2 with free GeoLite2 database (50K+ lookups/sec)
-          # Falls back gracefully if database not available
-          geoip_reader = None
+          # Initialize geoip2 with free GeoLite2 databases (50K+ lookups/sec)
+          # Falls back gracefully if databases not available
+          geoip_city_reader = None
+          geoip_asn_reader = None
           try:
               import geoip2.database
-              db_path = 'data/GeoLite2-City.mmdb'
-              geoip_reader = geoip2.database.Reader(db_path)
-              print(f'Loaded GeoLite2-City database from {db_path}')
+              city_path = 'data/GeoLite2-City.mmdb'
+              asn_path = 'data/GeoLite2-ASN.mmdb'
+              geoip_city_reader = geoip2.database.Reader(city_path)
+              print(f'Loaded GeoLite2-City database from {city_path}')
+              try:
+                  geoip_asn_reader = geoip2.database.Reader(asn_path)
+                  print(f'Loaded GeoLite2-ASN database from {asn_path}')
+              except Exception as e:
+                  print(f'GeoLite2-ASN database not available: {e}')
           except Exception as e:
               print(f'GeoLite2 database not available, will use ip-api.com only: {e}')
 
           def offline_geoip_lookup(ip):
               \"\"\"Fast offline GeoIP lookup using geoip2 (~50K lookups/sec).\"\"\"
-              if not geoip_reader:
+              if not geoip_city_reader:
                   return None
               try:
-                  result = geoip_reader.city(ip)
+                  result = geoip_city_reader.city(ip)
                   if result and result.country.iso_code:
-                      return dict(
+                      geo_data = dict(
                           country=result.country.name,
                           country_code=result.country.iso_code,
                           city=result.city.name,
                           lat=result.location.latitude,
                           lon=result.location.longitude,
-                          asn=None,  # Requires separate ASN database
+                          asn=None,
                           asn_org=None,
                           isp=None,
                           org=None,
                           source='geolite2',
                       )
+                      # Add ASN data if available
+                      if geoip_asn_reader:
+                          try:
+                              asn_result = geoip_asn_reader.asn(ip)
+                              if asn_result:
+                                  geo_data['asn'] = f'AS{asn_result.autonomous_system_number}'
+                                  geo_data['asn_org'] = asn_result.autonomous_system_organization
+                                  geo_data['org'] = asn_result.autonomous_system_organization
+                          except Exception:
+                              pass
+                      return geo_data
               except Exception:
                   pass
               return None
@@ -298,7 +318,7 @@ jobs:
                   all_ips.append(ip)
 
               # Phase 1: Offline lookup (instant, no rate limits)
-              if geoip_reader:
+              if geoip_city_reader:
                   print(f'  Phase 1: Offline lookup for {len(all_ips)} IPs...')
                   import time
                   start = time.time()
