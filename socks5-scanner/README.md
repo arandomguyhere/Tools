@@ -420,9 +420,10 @@ The scanner uses a **hybrid approach** for maximum GeoIP coverage with minimal l
 | Source | Type | Fields | Rate Limit |
 |--------|------|--------|------------|
 | [GeoLite2-City](https://github.com/P3TERX/GeoLite.mmdb) | Offline MMDB | Country, City, Coords | None |
-| [ip-api.com](https://ip-api.com/) | REST API | + ISP, Org, ASN | 45 req/min |
+| [GeoLite2-ASN](https://github.com/P3TERX/GeoLite.mmdb) | Offline MMDB | ASN, Org | None |
+| [ip-api.com](https://ip-api.com/) | REST API | + ISP (fallback only) | 45 req/min |
 
-The GeoLite2 database is downloaded fresh each scan from a community-maintained mirror (updated daily).
+Both GeoLite2 databases are downloaded fresh each scan from a community-maintained mirror (updated daily).
 
 ---
 
