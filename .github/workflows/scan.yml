@@ -195,65 +195,8 @@ jobs:
                   print(f'  Batch GeoIP error: {e}')
               return results
 
-          async def fetch_blocklists(session):
-              \"\"\"Fetch threat intelligence blocklists (free, unlimited).\"\"\"
-              blocklists = dict(
-                  feodo=set(),      # Botnet C2 IPs
-                  sslbl=set(),      # SSL abusers
-                  urlhaus=set(),    # Malware distribution
-              )
-
-              sources = [
-                  ('feodo', 'https://feodotracker.abuse.ch/downloads/ipblocklist.txt'),
-                  ('sslbl', 'https://sslbl.abuse.ch/blacklist/sslipblacklist.txt'),
-                  ('urlhaus', 'https://urlhaus.abuse.ch/downloads/text/'),
-              ]
-
-              for name, url in sources:
-                  try:
-                      async with session.get(url, timeout=aiohttp.ClientTimeout(total=30)) as resp:
-                          if resp.status == 200:
-                              text = await resp.text()
-                              for line in text.split('\\n'):
-                                  line = line.strip()
-                                  if line and not line.startswith('#') and not line.startswith(';'):
-                                      # Extract IP from various formats
-                                      if '/' in line:  # CIDR notation - just use base IP
-                                          ip = line.split('/')[0]
-                                      elif ':' in line and 'http' not in line.lower():  # IP:port
-                                          ip = line.split(':')[0]
-                                      elif 'http' in line.lower():  # URL - extract host
-                                          import re
-                                          match = re.search(r'://([0-9.]+)', line)
-                                          if match:
-                                              ip = match.group(1)
-                                          else:
-                                              continue
-                                      else:
-                                          ip = line
-                                      # Validate it looks like an IP
-                                      parts = ip.split('.')
-                                      if len(parts) == 4 and all(p.isdigit() for p in parts):
-                                          blocklists[name].add(ip)
-                              print(f'  {name}: {len(blocklists[name])} IPs loaded')
-                  except Exception as e:
-                      print(f'  {name}: failed ({str(e)[:30]})')
-
-              return blocklists
-
-          def check_blocklists(ip, blocklists):
-              \"\"\"Check IP against all blocklists, return threat info.\"\"\"
-              sources = []
-              for name, ips in blocklists.items():
-                  if ip in ips:
-                      sources.append(name)
-              if sources:
-                  return dict(
-                      score=min(len(sources) * 5, 10),
-                      sources=sources,
-                      flagged=True,
-                  )
-              return None
+          # Import threat module (proper CIDR support, multiple sources, better scoring)
+          from src.threat import ThreatChecker
 
           async def main():
               # Validate concurrency input (min: 10, max: 2000)
@@ -349,11 +292,19 @@ jobs:
                           print(f'    API batch {i//100 + 1}/{(len(offline_misses)+99)//100}: {len(geo_results)} results')
                           await asyncio.sleep(0.5)  # Rate limit between batches
 
-                  # Fetch threat blocklists (free, unlimited - checks ALL proxies)
+                  # Fetch threat blocklists using threat module
+                  # (proper CIDR support, 9 sources, severity-based scoring)
                   print('Fetching threat intelligence blocklists...')
-                  blocklists = await fetch_blocklists(geo_session)
-                  total_blocklist_ips = sum(len(v) for v in blocklists.values())
-                  print(f'Total blocklist IPs: {total_blocklist_ips}')
+                  threat_checker = ThreatChecker()
+                  threat_checker._session = geo_session  # Reuse existing session
+                  threat_stats = await threat_checker.fetch_blocklists()
+                  print(f'  Sources: {threat_stats["sources_ok"]}/{threat_stats["sources_total"]} loaded')
+                  print(f'  Total IPs: {threat_stats["total_ips"]}, Networks: {threat_stats["total_networks"]}')
+                  for name, detail in threat_stats.get('details', {}).items():
+                      if 'error' in detail:
+                          print(f'    {name}: FAILED ({detail["error"]})')
+                      else:
+                          print(f'    {name}: {detail.get("ips", 0)} IPs, {detail.get("networks", 0)} networks')
 
                   # Build enriched list with threat checks
                   otx_key = os.environ.get('OTX_API_KEY', '')
@@ -372,14 +323,12 @@ jobs:
                       if ip in all_geo:
                           proxy_data['geo'] = all_geo[ip]
 
-                      # Check against blocklists (ALL proxies, no rate limit)
-                      threat_data = check_blocklists(ip, blocklists)
-                      if threat_data:
-                          proxy_data['threat'] = threat_data
+                      # Check against blocklists using threat module
+                      # (proper CIDR matching, severity-based scoring)
+                      threat_result = threat_checker.check_ip(ip)
+                      proxy_data['threat'] = threat_result.to_dict()
+                      if threat_result.flagged:
                           blocklist_hits += 1
-                      else:
-                          # Default to clean if not in blocklists
-                          proxy_data['threat'] = dict(score=0, sources=[], flagged=False)
 
                       # Optional OTX enrichment (adds pulse count for first 50)
                       if otx_key and i < otx_limit:
@@ -397,7 +346,13 @@ jobs:
                                       # Merge OTX data with blocklist data
                                       proxy_data['threat']['pulses'] = pulse_count
                                       if pulse_count > 0:
-                                          proxy_data['threat']['score'] = max(proxy_data['threat'].get('score', 0), min(pulse_count, 10))
+                                          new_score = max(proxy_data['threat'].get('score', 0), min(pulse_count, 10))
+                                          proxy_data['threat']['score'] = new_score
+                                          # Update level based on new score
+                                          if new_score >= 5:
+                                              proxy_data['threat']['level'] = 'risk'
+                                          elif new_score > 0:
+                                              proxy_data['threat']['level'] = 'low'
                                           if 'otx' not in proxy_data['threat'].get('sources', []):
                                               proxy_data['threat'].setdefault('sources', []).append('otx')
                                       otx_success += 1
