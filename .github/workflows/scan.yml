@@ -197,6 +197,8 @@ jobs:
 
           # Import threat module (proper CIDR support, multiple sources, better scoring)
           from src.threat import ThreatChecker
+          # Import hunter for dynamic source discovery
+          from src.hunter import ProxyHunter
 
           async def main():
               # Validate concurrency input (min: 10, max: 2000)
@@ -208,14 +210,25 @@ jobs:
                   max_concurrent=concurrency
               )
 
-              sources = Socks5Scanner.DEFAULT_SOURCES
-              print(f'Using {len(sources)} proxy sources with concurrency={concurrency}')
+              # Use ProxyHunter for expanded source discovery
+              # BACKUP_SOURCES has 60+ known good repos vs DEFAULT_SOURCES (52)
+              hunter = ProxyHunter(github_token=os.environ.get('GITHUB_TOKEN'))
+
+              # Build source URLs from hunter's backup sources
+              hunter_sources = []
+              for owner, name, path in hunter.BACKUP_SOURCES:
+                  hunter_sources.append(f'https://raw.githubusercontent.com/{owner}/{name}/main/{path}')
+                  hunter_sources.append(f'https://raw.githubusercontent.com/{owner}/{name}/master/{path}')
+
+              # Combine with scanner's default sources and API endpoints
+              all_sources = list(set(hunter_sources + Socks5Scanner.DEFAULT_SOURCES))
+              print(f'Using {len(all_sources)} proxy sources ({len(hunter.BACKUP_SOURCES)} hunter + {len(Socks5Scanner.DEFAULT_SOURCES)} default)')
 
               # OPTIMIZATION 1: Parallel source fetching
               print('Fetching sources in parallel...')
               proxies = set()
               async with aiohttp.ClientSession() as session:
-                  tasks = [fetch_source(session, url, proxies) for url in sources]
+                  tasks = [fetch_source(session, url, proxies) for url in all_sources]
                   results = await asyncio.gather(*tasks, return_exceptions=True)
                   for r in results:
                       if isinstance(r, tuple):
@@ -225,7 +238,34 @@ jobs:
                           elif added > 0:
                               print(f'  {url}... +{added}')
 
-              print(f'Collected {len(proxies)} unique proxies')
+              print(f'Collected {len(proxies)} unique proxies from static sources')
+
+              # OPTIMIZATION 2: Dynamic GitHub discovery (if token available)
+              github_token = os.environ.get('GITHUB_TOKEN')
+              if github_token:
+                  print('Searching GitHub for new proxy sources...')
+                  try:
+                      discovered = hunter.search_github_live(max_results_per_query=30)
+                      print(f'  Discovered {len(discovered)} potential repositories')
+                      discovered_count = 0
+                      for repo in discovered[:20]:  # Check top 20 by scent score
+                          raw_url = hunter.discover_raw_url(repo)
+                          if raw_url:
+                              new_proxies = hunter.fetch_proxies(raw_url)
+                              if new_proxies:
+                                  before = len(proxies)
+                                  proxies.update(new_proxies)
+                                  added = len(proxies) - before
+                                  if added > 0:
+                                      print(f'    {repo.owner}/{repo.name}: +{added} new')
+                                      discovered_count += added
+                      print(f'  Dynamic discovery added {discovered_count} unique proxies')
+                  except Exception as e:
+                      print(f'  GitHub discovery failed: {str(e)[:50]}')
+              else:
+                  print('No GITHUB_TOKEN, skipping dynamic discovery')
+
+              print(f'Total unique proxies: {len(proxies)}')
 
               if not proxies:
                   print('No proxies found')
