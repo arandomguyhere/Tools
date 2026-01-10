@@ -281,11 +281,13 @@ The scanner runs every 6 hours via GitHub Actions:
 
 ### CI/CD Optimizations
 The GitHub Actions workflow includes several optimizations:
+- **ProxyHunter integration** - 60+ known good repos + dynamic GitHub discovery
 - **uvloop** - 20-30% faster async event loop
 - **Hybrid GeoIP** - GeoLite2 offline database (50K+ lookups/sec) + API fallback
-- **Parallel source fetching** - All 20+ sources fetched concurrently
+- **Parallel source fetching** - All 170+ sources fetched concurrently
 - **500 concurrent connections** - 5x default concurrency
 - **No GeoIP limits** - ALL working proxies enriched (not capped at 500)
+- **Dynamic discovery** - Searches GitHub for new sources (with GITHUB_TOKEN)
 
 ### Real-World Benchmarks (GitHub Actions)
 | Metric | Result |
@@ -336,7 +338,8 @@ socks5-scanner/
 │   ├── cli.py                # CLI interface
 │   ├── scanner.py            # Source collection
 │   ├── validator.py          # Validation
-│   ├── hunter.py             # GitHub discovery
+│   ├── hunter.py             # GitHub source discovery
+│   ├── threat.py             # Threat intelligence (9 sources, CIDR)
 │   └── utils.py              # Utilities
 ├── requirements.txt
 └── README.md
@@ -344,17 +347,55 @@ socks5-scanner/
 
 ---
 
+## Source Discovery (ProxyHunter)
+
+The scanner uses `src/hunter.py` to discover and fetch proxies from multiple sources. Inspired by [Proxy-Hound](https://github.com/arandomguyhere/Proxy-Hound).
+
+### Source Tiers
+
+| Tier | Count | Description |
+|------|-------|-------------|
+| **Backup Sources** | 60+ | Known good GitHub repos (always checked) |
+| **Default Sources** | 52 | Scanner's static source list |
+| **Dynamic Discovery** | Variable | GitHub search for new repos (with token) |
+
+### Features
+
+- **170+ combined sources** - Deduplicated URLs from hunter + scanner
+- **Parallel fetching** - All sources fetched concurrently
+- **Scent analysis** - Scores repos by "proxy-likeness" (keywords, freshness, stars)
+- **Hunt database** - SQLite tracking of which sources work best over time
+- **Dynamic discovery** - Searches GitHub API for recently updated proxy repos
+
+### Enabling Dynamic Discovery
+
+To enable GitHub search for new sources, add a `GITHUB_TOKEN` secret:
+
+1. Go to repo Settings → Secrets and variables → Actions
+2. Click "New repository secret"
+3. Name: `GITHUB_TOKEN`, Value: a personal access token (public repo scope)
+
+Without a token, only the 170+ static sources are used.
+
+---
+
 ## Threat Intelligence
 
-Multi-source threat intelligence checking for ALL proxies using free, unlimited APIs.
+Multi-source threat intelligence checking for ALL proxies using free, unlimited APIs. Implemented in `src/threat.py` with proper CIDR range matching and severity-based scoring.
 
-### Data Sources (Free, No API Key Required)
+### Data Sources (9 Sources, Free, No API Key Required)
 
-| Source | Type | Description |
-|--------|------|-------------|
-| **[Feodo Tracker](https://feodotracker.abuse.ch/)** | Botnet C2 | Tracks botnet command & control servers |
-| **[SSLBL](https://sslbl.abuse.ch/)** | SSL Blacklist | Malicious SSL certificates and IPs |
-| **[URLhaus](https://urlhaus.abuse.ch/)** | Malware URLs | Malware distribution sites |
+| Source | Severity | Type | Description |
+|--------|----------|------|-------------|
+| **[Feodo Tracker](https://feodotracker.abuse.ch/)** | High | Botnet C2 | Tracks botnet command & control servers |
+| **[SSLBL](https://sslbl.abuse.ch/)** | High | SSL Blacklist | Malicious SSL certificates and IPs |
+| **[URLhaus](https://urlhaus.abuse.ch/)** | High | Malware URLs | Malware distribution sites |
+| **[FireHOL Level 1](https://github.com/firehol/blocklist-ipsets)** | High | Aggregated | High confidence threats (CIDR ranges) |
+| **[Spamhaus DROP](https://www.spamhaus.org/drop/)** | Medium | Hijacked | Hijacked/leased networks for spam (CIDR) |
+| **[Spamhaus EDROP](https://www.spamhaus.org/drop/)** | Medium | Extended | Extended DROP list (CIDR ranges) |
+| **[Emerging Threats](https://rules.emergingthreats.net/)** | Medium | Compromised | Known compromised IPs |
+| **[Binary Defense](https://www.binarydefense.com/)** | Medium | Active | Active threat hunting IPs |
+| **[CI Army](https://cinsscore.com/)** | Low | Malicious | Known malicious IPs |
 
 ### Optional: AlienVault OTX (API Key Required)
 
@@ -369,18 +410,26 @@ For additional threat pulse data on the first 50 proxies:
 
 ### How It Works
 1. **Blocklists** are fetched at scan time (no rate limits)
-2. **ALL proxies** are checked against blocklists instantly
-3. **OTX** adds pulse count for first 50 (if API key set)
-4. **Tooltips** show which sources flagged each IP
+2. **CIDR ranges** are properly matched using Python's `ipaddress` module
+3. **ALL proxies** are checked against all 9 sources instantly
+4. **Severity scoring** - high severity sources score higher than low
+5. **OTX** adds pulse count for first 50 (if API key set)
+6. **Tooltips** show which sources flagged each IP and severity level
 
-### Threat Levels
+### Threat Levels (Severity-Based Scoring)
+
 | Badge | Score | Meaning |
 |-------|-------|---------|
 | **Clean** (green) | 0 | Not in any blocklist |
-| **Low** (yellow) | 1-4 | Flagged by 1 source or low OTX pulses |
-| **Risk** (red) | 5+ | Multiple sources or high OTX pulses |
+| **Low** (yellow) | 1-4 | Low/medium severity source (spam, suspicious) |
+| **Risk** (red) | 5+ | High severity source (C2, malware) or multiple sources |
 
-Hover over any threat badge to see which sources flagged that IP.
+**Scoring Formula:**
+- Base score from max severity: Low=2, Medium=4, High=6
+- +1 for each additional source (max +4)
+- Total range: 0-10
+
+Hover over any threat badge to see which sources flagged that IP and the severity level.
 
 ---
 
