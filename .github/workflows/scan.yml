@@ -339,13 +339,13 @@ jobs:
                   threat_checker = ThreatChecker()
                   threat_checker._session = geo_session  # Reuse existing session
                   threat_stats = await threat_checker.fetch_blocklists()
-                  print(f'  Sources: {threat_stats["sources_ok"]}/{threat_stats["sources_total"]} loaded')
-                  print(f'  Total IPs: {threat_stats["total_ips"]}, Networks: {threat_stats["total_networks"]}')
+                  print(f'  Sources: {threat_stats.get(\"sources_ok\", 0)}/{threat_stats.get(\"sources_total\", 0)} loaded')
+                  print(f'  Total IPs: {threat_stats.get(\"total_ips\", 0)}, Networks: {threat_stats.get(\"total_networks\", 0)}')
                   for name, detail in threat_stats.get('details', {}).items():
                       if 'error' in detail:
-                          print(f'    {name}: FAILED ({detail["error"]})')
+                          print(f'    {name}: FAILED ({detail.get(\"error\", \"unknown\")})')
                       else:
-                          print(f'    {name}: {detail.get("ips", 0)} IPs, {detail.get("networks", 0)} networks')
+                          print(f'    {name}: {detail.get(\"ips\", 0)} IPs, {detail.get(\"networks\", 0)} networks')
 
                   # Build enriched list with threat checks
                   otx_key = os.environ.get('OTX_API_KEY', '')
