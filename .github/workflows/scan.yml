@@ -64,9 +64,10 @@ jobs:
 
       - name: Run proxy scan
         working-directory: socks5-scanner
-        continue-on-error: true
+        id: scan
         timeout-minutes: 90
         run: |
+          set -e  # Exit on error
           python -c "
           import asyncio
           import json
@@ -546,11 +547,39 @@ jobs:
             echo "No results file found" >> $GITHUB_STEP_SUMMARY
           fi
 
+      - name: Verify scan output
+        working-directory: socks5-scanner
+        run: |
+          echo "Checking scan output files..."
+          ls -la proxies/
+          if [ ! -f proxies/results.json ]; then
+            echo "ERROR: results.json not found - scan may have failed"
+            exit 1
+          fi
+          WORKING_COUNT=$(wc -l < proxies/proxies_working.txt 2>/dev/null || echo "0")
+          echo "Working proxies: $WORKING_COUNT"
+          if [ "$WORKING_COUNT" -eq 0 ]; then
+            echo "WARNING: No working proxies found"
+          fi
+
       - name: Commit results
         working-directory: socks5-scanner
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add proxies/ || true
-          git diff --staged --quiet || git commit -m "Update proxy list [skip ci]"
-          git push || true
+
+          echo "Staging changes..."
+          git add proxies/
+
+          echo "Checking for changes..."
+          if git diff --staged --quiet; then
+            echo "No changes to commit (files unchanged)"
+          else
+            echo "Committing changes..."
+            git diff --staged --stat
+            git commit -m "Update proxy list: $(date -u +%Y-%m-%d_%H:%M)"
+
+            echo "Pushing to remote..."
+            git push
+            echo "Push successful!"
+          fi
